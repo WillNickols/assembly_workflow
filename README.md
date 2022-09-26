@@ -45,3 +45,6 @@ An example of something I've run would be the following:
   --checkm-path /n/holystore01/LABS/huttenhower_lab/Users/wnickols/checkm2/ \
   --phylophlan-database-folder /n/holystore01/LABS/huttenhower_lab/Users/wnickols/phylophlan/phylophlan_databases \
 ```
+
+### Interpretation
+The file `20220921 MAG Workflow.docx` has a description of what each step in the workflow does.  The output will look like a MetaPhlAn output file with samples as columns and taxa as rows.  The assigned taxa will be either known (name looks normal) or unknown (taxa name contains a genome bin (GB) ID like CGB, FGB, GGB, or SGB).  At the bottom of the file, you might get some new species unplaced by PhyloPhlAn 3 (sgb_XX).  The last line is an estimation of how much of the sample is unknown (this does not include sgb_XX type material but is instead based on the proportion of reads not aligning to contigs, the proportion of unbinned contigs, and the proportion of low quality bins).  All the numbers are the percent abundances (so columns should sum to 100).
