@@ -3,7 +3,8 @@
 > This repository contains code for Will's assembly workflow based on Aaron Walsh's pets assembly workflow and Segata et al. 2019. For queries, contact Will Nickols (email: <willnickols@college.harvard.edu>).
 
 ### Dependencies
-- 
+- Run `git clone --recursive https://github.com/WillNickols/assembly_workflow`
+- Move into the directory: `cd assembly_workflow`
 - The conda environment to run this workflow can be created with `conda env create -f environment.yml`
 - Additionally, some equivalent to `hutlab load centos7/python3/biobakery_workflows/3.0.0-beta-devel` will be necessary.  Namely, PhyloPhlAn 3, MEGAHIT, and Mash (and possibly others but I'm not sure) will need to be installed and added to the path.
 - If you're using `hutlab load centos7/python3/biobakery_workflows/3.0.0-beta-devel`, you should run `export SETUPTOOLS_USE_DISTUTILS=stdlib` to avoid path Python path issues
