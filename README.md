@@ -50,6 +50,19 @@ An example of something I've run would be the following:
 The file `20220921 MAG Workflow.docx` has a description of what each step in the workflow does.  The main output (`final_profile_by_sample.tsv`) will look like a MetaPhlAn output file with samples as columns and taxa as rows.  The assigned taxa will be either known (name looks normal) or unknown (taxa name contains a genome bin (GB) ID like CGB, FGB, GGB, or SGB).  At the bottom of the file, you might get some new species unplaced by PhyloPhlAn 3 (sgb_XX).  The last line is an estimation of how much of the sample is unknown (this does not include sgb_XX type material but is instead based on the proportion of reads not aligning to contigs, the proportion of unbinned contigs, and the proportion of low quality bins).  All the numbers are the percent abundances (so columns should sum to 100).
 
 ### Commands I've run:
+
+Before the runs, I call the following:
+`conda activate mags_and_sgbs2
+hutlab load centos7/python3/biobakery_workflows/3.0.0-beta-devel
+export SETUPTOOLS_USE_DISTUTILS=stdlib
+export CHECKM_DATA_PATH=/n/holystore01/LABS/huttenhower_lab/Users/wnickols/checkm_db/
+PATH=/n/home08/wnickols/.conda/envs/mags_and_sgbs2/lib:/n/home08/wnickols/.conda/envs/mags_and_sgbs2/bin:$PATH
+PYTHONPATH=/n/home08/wnickols/.conda/envs/mags_and_sgbs2/lib/python3.7/site-packages:$PYTHONPATH`
+
+Examples of actual runs include the following:
+
+`python /n/holystore01/LABS/huttenhower_lab/Users/wnickols/code/mag_sgb_workflow/mag_workflow.py -i /n/holystore01/LABS/huttenhower_lab/Users/awalsh/meta_analysis/output/biobakery_workflows/kneaddata/main/ -o /n/holystore01/LABS/huttenhower_lab/Users/awalsh/meta_analysis/output/will_assembly/ --grid-scratch /n/holyscratch01/nguyen_lab/wnickols/aaron_assembly/ --grid-partition 'shared' --grid-jobs 500 --cores 8 --time 10000 --mem 40000 --input-extension fastq.gz --paired concatenated --local-jobs 12 --phylophlan-database SGB.Jul20 --checkm-path /n/holystore01/LABS/huttenhower_lab/Users/wnickols/checkm2/ --phylophlan-database-folder /n/holystore01/LABS/huttenhower_lab/Users/wnickols/phylophlan/phylophlan_databases --abundance-type by_sample`
+
 `python /n/holystore01/LABS/huttenhower_lab/Users/wnickols/code/mag_sgb_workflow/mag_workflow.py -i /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/coastal_new/kneaddata/ -o /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/coastal_new/assembly/ --grid-scratch /n/holyscratch01/nguyen_lab/wnickols/coastal/assembly/ --grid-partition 'shared' --grid-jobs 96 --cores 8 --time 10000 --mem 40000 --input-extension fastq.gz --paired paired --local-jobs 12 --phylophlan-database SGB.Jul20 --checkm-path /n/holystore01/LABS/huttenhower_lab/Users/wnickols/checkm2/ --phylophlan-database-folder /n/holystore01/LABS/huttenhower_lab/Users/wnickols/phylophlan/phylophlan_databases --abundance-type by_sample`
 
 `python /n/holystore01/LABS/huttenhower_lab/Users/wnickols/code/mag_sgb_workflow/mag_workflow.py -i /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/gators_new/kneaddata/ -o /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/gators_new/assembly/ --grid-scratch /n/holyscratch01/nguyen_lab/wnickols/gators/assembly/ --grid-partition 'shared' --grid-jobs 96 --cores 8 --time 10000 --mem 40000 --input-extension fastq.gz --paired unpaired --local-jobs 12 --phylophlan-database SGB.Jul20 --checkm-path /n/holystore01/LABS/huttenhower_lab/Users/wnickols/checkm2/ --phylophlan-database-folder /n/holystore01/LABS/huttenhower_lab/Users/wnickols/phylophlan/phylophlan_databases --grid-options="--account=nguyen_lab" --abundance-type by_sample`
