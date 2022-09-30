@@ -52,12 +52,17 @@ The file `20220921 MAG Workflow.docx` has a description of what each step in the
 ### Commands I've run:
 
 Before the runs, I call the following:
-`conda activate mags_and_sgbs2
-hutlab load centos7/python3/biobakery_workflows/3.0.0-beta-devel
-export SETUPTOOLS_USE_DISTUTILS=stdlib
-export CHECKM_DATA_PATH=/n/holystore01/LABS/huttenhower_lab/Users/wnickols/checkm_db/
-PATH=/n/home08/wnickols/.conda/envs/mags_and_sgbs2/lib:/n/home08/wnickols/.conda/envs/mags_and_sgbs2/bin:$PATH
-PYTHONPATH=/n/home08/wnickols/.conda/envs/mags_and_sgbs2/lib/python3.7/site-packages:$PYTHONPATH`
+`conda activate mags_and_sgbs2`
+
+`hutlab load centos7/python3/biobakery_workflows/3.0.0-beta-devel`
+
+`export SETUPTOOLS_USE_DISTUTILS=stdlib`
+
+`export CHECKM_DATA_PATH=/n/holystore01/LABS/huttenhower_lab/Users/wnickols/checkm_db/`
+
+`PATH=/n/home08/wnickols/.conda/envs/mags_and_sgbs2/lib:/n/home08/wnickols/.conda/envs/mags_and_sgbs2/bin:$PATH`
+
+`PYTHONPATH=/n/home08/wnickols/.conda/envs/mags_and_sgbs2/lib/python3.7/site-packages:$PYTHONPATH`
 
 Examples of actual runs include the following:
 
