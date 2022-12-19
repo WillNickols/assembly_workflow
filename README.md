@@ -4,7 +4,7 @@
 
 # Installation
 
-Install with yml file
+Install with yml file.  The PhyloPhlAn run will intentionally fail in order to download the database.
 ```
 git clone https://github.com/WillNickols/assembly_workflow
 cd assembly_workflow
@@ -85,8 +85,9 @@ python assembly_workflow.py \
   --grid-options="--account=nguyen_lab"
 ```
 
-Run the biobakery wmgx assembly and then this pipeline from the assembled contigs
+Run the biobakery wmgx assembly and then this pipeline from the assembled contigs.  The `biobakery_workflows wmgx` with `--run-assembly` fails in the Prokka step (unrelated to this workflow), but enough of the assembly happens beforehand that the assembly workflow can proceed.
 ```
+hutlab load centos7/python3/biobakery_workflows/3.0.0-beta-devel-dependsUpdate
 biobakery_workflows wmgx \
   --input /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/mags_and_sgbs_pipeline_testing/test_inputs/contigs_int_kneaddata/ \
   --output /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/mags_and_sgbs_pipeline_testing/test_outputs/contigs_int/ \
@@ -101,6 +102,11 @@ biobakery_workflows wmgx \
   --grid-partition shared \
   --input-extension fastq \
   --grid-options="--account=nguyen_lab"
+  
+hutlab unload
+conda activate biobakery_assembly
+export CHECKM_DATA_PATH=$(pwd)/databases/checkm/
+export PHYLOPHLAN_PATH=$(pwd)/databases/phylophlan/
 
 python assembly_workflow.py \
   -i /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/mags_and_sgbs_pipeline_testing/test_inputs/contigs_int_kneaddata/ \
