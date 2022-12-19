@@ -75,7 +75,7 @@ Concatenated input and removing intermediate outputs
 python assembly_workflow.py \
   -i /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/mags_and_sgbs_pipeline_testing/test_inputs/concat/ \
   -o /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/mags_and_sgbs_pipeline_testing/test_outputs/concat/ \
-  --abundance-type by_sample --input-extension fastq.gz --paired unpaired \
+  --abundance-type by_sample --input-extension fastq.gz --paired concatenated \
   --grid-scratch /n/holyscratch01/nguyen_lab/wnickols/mags_and_sgbs_pipeline_testing/concat/ \
   --grid-partition 'shared' --grid-jobs 96 --cores 8 --time 10000 --mem 40000 \
   --local-jobs 12 \
@@ -87,7 +87,7 @@ Run the biobakery wmgx assembly and then this pipeline from the assembled contig
 ```
 biobakery_workflows wmgx \
   --input /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/mags_and_sgbs_pipeline_testing/test_inputs/contigs_int_kneaddata/ \
-  --output /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/mags_and_sgbs_pipeline_testing/test_inputs/contigs_int/ \
+  --output /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/mags_and_sgbs_pipeline_testing/test_outputs/contigs_int/ \
   --bypass-quality-control \
   --threads 8 \
   --bypass-functional-profiling \
@@ -101,9 +101,9 @@ biobakery_workflows wmgx \
   --input-extension fastq
 
 python assembly_workflow.py \
-  -i /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/mags_and_sgbs_pipeline_testing/test_inputs/single_end/ \
-  -o /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/mags_and_sgbs_pipeline_testing/test_outputs/single_end/ \
-  --abundance-type by_sample --input-extension fastq.gz --paired unpaired \
+  -i /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/mags_and_sgbs_pipeline_testing/test_inputs/contigs_int_kneaddata/ \
+  -o /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/mags_and_sgbs_pipeline_testing/test_outputs/contigs_int/ \
+  --abundance-type by_sample --input-extension fastq --paired concatenated \
   --grid-scratch /n/holyscratch01/nguyen_lab/wnickols/mags_and_sgbs_pipeline_testing/single_end/ \
   --grid-partition 'shared' --grid-jobs 96 --cores 8 --time 10000 --mem 40000 \
   --local-jobs 12 \
