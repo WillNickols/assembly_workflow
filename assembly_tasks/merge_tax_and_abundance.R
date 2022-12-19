@@ -104,6 +104,8 @@ for (name in profile$Taxonomy) {
   }
 }
 
+profile[,-1] <- data.frame(lapply(data.frame(profile[,-1]), as.numeric))
+
 # Combine same taxonomic groups again
 total_profile <- aggregate(.~Taxonomy,data=profile,FUN=sum)
 

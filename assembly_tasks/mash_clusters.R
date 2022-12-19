@@ -4,6 +4,9 @@ library(docopt)
 library(dplyr)
 library(data.table)
 library(doParallel)
+library(tibble)
+library(tidyr)
+library(stringr)
 
 'Usage:
    mash_clusters.R [--mash <mash> --checkm <checkm> --phylo <phylophlan_relab> --mag_dir <mag_dir> --out_dir <out_dir> --threads <threads>]
