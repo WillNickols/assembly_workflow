@@ -80,7 +80,7 @@ python assembly_workflow.py \
   --grid-partition 'shared' --grid-jobs 96 --cores 8 --time 10000 --mem 40000 \
   --local-jobs 12 \
   --grid-options="--account=nguyen_lab" \
-  --remove-intermediate-files
+  --remove-intermediate-files y
 ```
 
 Run the biobakery wmgx assembly and then this pipeline from the assembled contigs
