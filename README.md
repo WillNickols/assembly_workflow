@@ -4,7 +4,7 @@
 
 # Installation
 
-Install with yml file.  The PhyloPhlAn run will intentionally fail in order to download the database.
+The workflow can be installed with the following commands.  The PhyloPhlAn run will intentionally fail in order to download the database.
 ```
 git clone https://github.com/WillNickols/assembly_workflow
 cd assembly_workflow
@@ -17,7 +17,7 @@ mkdir tmp_to_delete && mkdir -p databases/phylophlan && touch tmp_to_delete/tmp.
 export PHYLOPHLAN_PATH=$(pwd)/databases/phylophlan/
 ```
 
-Install necessary R packages
+Run the following commands to install the necessary R packages.
 ```
 R
 install.packages(c("docopt", "dplyr", "data.table", "stringr", "doParallel", "tidyr"))
@@ -33,7 +33,7 @@ export PHYLOPHLAN_PATH=$(pwd)/databases/phylophlan/
 
 # Example runs
 
-Run the workflow without taxonomically placing the MAGs (only assemble, bin, and quality check)
+This command runs the workflow without taxonomically placing the MAGs (it runs only assembly, binning, and quality checking).
 ```
 python assembly_workflow.py \
   -i /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/mags_and_sgbs_pipeline_testing/test_inputs/single_end/ \
@@ -46,7 +46,7 @@ python assembly_workflow.py \
   --skip-placement y
 ```
 
-Single end run
+This command runs a single-end `fastq.gz` file.
 ```
 python assembly_workflow.py \
   -i /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/mags_and_sgbs_pipeline_testing/test_inputs/single_end/ \
@@ -59,7 +59,7 @@ python assembly_workflow.py \
   --grid-options="--account=nguyen_lab"
 ```
 
-Paired end with fastq extension instead of fastq.gz
+This command runs a paired-end `fastq` file.
 ```
 python assembly_workflow.py \
   -i /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/mags_and_sgbs_pipeline_testing/test_inputs/paired_end/ \
@@ -72,7 +72,7 @@ python assembly_workflow.py \
   --grid-options="--account=nguyen_lab"
 ```
 
-Concatenated input and removing intermediate outputs
+This command runs two concatenated `fastq.gz` files, one of which is single-end and one of which is paired-end.
 ```
 python assembly_workflow.py \
   -i /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/mags_and_sgbs_pipeline_testing/test_inputs/concat/ \
@@ -85,7 +85,7 @@ python assembly_workflow.py \
   --grid-options="--account=nguyen_lab"
 ```
 
-Run the biobakery wmgx assembly and then this pipeline from the assembled contigs.  The `biobakery_workflows wmgx` with `--run-assembly` fails in the Prokka step (unrelated to this workflow), but enough of the assembly happens beforehand that the assembly workflow can proceed.
+These commands run the `biobakery wmgx` assembly and then this pipeline from the assembled contigs.  The `biobakery_workflows wmgx` command with `--run-assembly` fails in the Prokka step (unrelated to this workflow), but enough of the assembly happens beforehand that the assembly workflow can proceed afterwards.
 ```
 hutlab load centos7/python3/biobakery_workflows/3.0.0-beta-devel-dependsUpdate
 biobakery_workflows wmgx \
