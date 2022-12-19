@@ -17,21 +17,23 @@ mkdir tmp_to_delete && mkdir -p databases/phylophlan && touch tmp_to_delete/tmp.
 export PHYLOPHLAN_PATH=$(pwd)/databases/phylophlan/
 ```
 
-# Install necessary R packages
+Install necessary R packages
 ```
 R
 install.packages(c("docopt", "dplyr", "data.table", "stringr", "doParallel", "tidyr"))
 q()
 ```
 
-To run once the conda environment is created and you are in the `assembly_workflow` directory:
+Once the conda environment is created and you are in the `assembly_workflow` directory, you can activate the environment with these commands:
 ```
 conda activate biobakery_assembly
 export CHECKM_DATA_PATH=$(pwd)/databases/checkm/
 export PHYLOPHLAN_PATH=$(pwd)/databases/phylophlan/
 ```
 
-No placement
+# Example runs
+
+Run the workflow without taxonomically placing the MAGs (only assemble, bin, and quality check)
 ```
 python assembly_workflow.py \
   -i /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/mags_and_sgbs_pipeline_testing/test_inputs/single_end/ \
@@ -41,11 +43,10 @@ python assembly_workflow.py \
   --grid-partition 'shared' --grid-jobs 96 --cores 8 --time 10000 --mem 40000 \
   --local-jobs 12 \
   --grid-options="--account=nguyen_lab" \
-  --skip-placement y \
-  --dry-run
+  --skip-placement y
 ```
 
-Single end
+Single end run
 ```
 python assembly_workflow.py \
   -i /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/mags_and_sgbs_pipeline_testing/test_inputs/single_end/ \
@@ -57,7 +58,7 @@ python assembly_workflow.py \
   --grid-options="--account=nguyen_lab"
 ```
 
-Paired end with fastq instead of fastq.gz
+Paired end with fastq extension instead of fastq.gz
 ```
 python assembly_workflow.py \
   -i /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/mags_and_sgbs_pipeline_testing/test_inputs/paired_end/ \
@@ -69,7 +70,7 @@ python assembly_workflow.py \
   --grid-options="--account=nguyen_lab"
 ```
 
-From concatenated file, removing intermediate outputs
+Concatenated input and removing intermediate outputs
 ```
 python assembly_workflow.py \
   -i /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/mags_and_sgbs_pipeline_testing/test_inputs/concat/ \
@@ -82,7 +83,7 @@ python assembly_workflow.py \
   --remove-intermediate-files
 ```
 
-From biobakery assembly output
+Run the biobakery wmgx assembly and then this pipeline from the assembled contigs
 ```
 biobakery_workflows wmgx \
   --input /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/mags_and_sgbs_pipeline_testing/test_inputs/contigs_int_kneaddata/ \
