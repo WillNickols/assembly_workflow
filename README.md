@@ -55,6 +55,7 @@ python assembly_workflow.py \
   --grid-scratch /n/holyscratch01/nguyen_lab/wnickols/mags_and_sgbs_pipeline_testing/single_end/ \
   --grid-partition 'shared' --grid-jobs 96 --cores 8 --time 10000 --mem 40000 \
   --local-jobs 12 \
+  --remove-intermediate-files y \
   --grid-options="--account=nguyen_lab"
 ```
 
@@ -67,6 +68,7 @@ python assembly_workflow.py \
   --grid-scratch /n/holyscratch01/nguyen_lab/wnickols/mags_and_sgbs_pipeline_testing/paired_end/ \
   --grid-partition 'shared' --grid-jobs 96 --cores 8 --time 10000 --mem 40000 \
   --local-jobs 12 \
+  --remove-intermediate-files y \
   --grid-options="--account=nguyen_lab"
 ```
 
@@ -79,8 +81,8 @@ python assembly_workflow.py \
   --grid-scratch /n/holyscratch01/nguyen_lab/wnickols/mags_and_sgbs_pipeline_testing/concat/ \
   --grid-partition 'shared' --grid-jobs 96 --cores 8 --time 10000 --mem 40000 \
   --local-jobs 12 \
-  --grid-options="--account=nguyen_lab" \
-  --remove-intermediate-files y
+  --remove-intermediate-files y \
+  --grid-options="--account=nguyen_lab"
 ```
 
 Run the biobakery wmgx assembly and then this pipeline from the assembled contigs
@@ -97,8 +99,8 @@ biobakery_workflows wmgx \
   --grid-jobs 8 \
   --grid-scratch /n/holyscratch01/nguyen_lab/wnickols/mags_and_sgbs_pipeline_testing/contigs_int/ \
   --grid-partition shared \
-  --grid-options="--account=nguyen_lab" \
-  --input-extension fastq
+  --input-extension fastq \
+  --grid-options="--account=nguyen_lab"
 
 python assembly_workflow.py \
   -i /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/mags_and_sgbs_pipeline_testing/test_inputs/contigs_int_kneaddata/ \
@@ -107,6 +109,8 @@ python assembly_workflow.py \
   --grid-scratch /n/holyscratch01/nguyen_lab/wnickols/mags_and_sgbs_pipeline_testing/contigs_int/ \
   --grid-partition 'shared' --grid-jobs 96 --cores 8 --time 10000 --mem 40000 \
   --local-jobs 12 \
-  --grid-options="--account=nguyen_lab" \
-  --skip-contigs y
+  --skip-contigs y \
+  --remove-intermediate-files y \
+  --grid-options="--account=nguyen_lab"
+  
 ```
