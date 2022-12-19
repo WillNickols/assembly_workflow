@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
 library(docopt)
-library(tidyverse)
+library(dplyr)
 library(data.table)
 library(doParallel)
 
@@ -116,14 +116,10 @@ get_members <- function(x) {
 
 phylophlan_relab <- fread(opts$phylo)
 
-head(phylophlan_relab)
-
 checkm <- fread(opts$checkm) %>%
   filter(bin_id %in% phylophlan_relab$mag[phylophlan_relab$taxon == "UNKNOWN"]) %>%
   filter(keep == "keep") %>%
   mutate(bin_id = paste0(bin_id, ".fa"))
-
-print(fread(opts$checkm)$bin_id[duplicated(fread(opts$checkm)$bin_id)])
 
 #######################
 # Mash distance table #
