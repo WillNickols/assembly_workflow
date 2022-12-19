@@ -15,7 +15,7 @@ workflow.add_argument("mem", desc="The maximum memory in megabytes allocated to 
 workflow.add_argument("input-extension", desc="the input file extension", default="fastq.gz")
 workflow.add_argument("time", desc="The maximum time in minutes allocated to run any individual command", type=int, default=10000)
 workflow.add_argument("paired", desc="Whether the inputs are \"unpaired\", \"paired\", or \"concatenated\"", default="paired")
-workflow.add_argument("skip-contigs", desc="Whether to skip MEGAHIT, contigs should be in $OUTPUT_DIRECTORY/assembly/main/$SAMPLE_NAME/$SAMPLE_NAME.final.contigs.fa")
+workflow.add_argument("skip-contigs", desc="Whether to skip MEGAHIT, contigs should be in $OUTPUT_DIRECTORY/assembly/main/$SAMPLE_NAME/$SAMPLE_NAME.final.contigs.fa or $OUTPUT_DIRECTORY/assembly/main/$SAMPLE_NAME/$SAMPLE_NAME.contigs.fa")
 workflow.add_argument("skip-placement", desc="Whether to stop after checkm steps")
 workflow.add_argument("remove-intermediate-files", desc="Remove intermediate files")
 workflow.add_argument("min-contig-length", desc='MEGAHIT --min-contig-length and MetaBAT -m parameter', default=1500)
@@ -81,6 +81,7 @@ make_directory(output)
 scratch = "/" + args.grid_scratch.strip("/") + "/"
 make_directory(scratch)
 
+deconcatenated_dir = output + "deconcatenated/"
 if paired == "concatenated":
 	scratch_searched = scratch + "searched/"
 	make_directory(scratch_searched)
@@ -88,7 +89,6 @@ if paired == "concatenated":
 	scratch_deconcatenated = scratch + "deconcatenated/"
 	make_directory(scratch_deconcatenated)
 
-	deconcatenated_dir = output + "deconcatenated/"
 	make_directory(deconcatenated_dir)
 
 assembly_dir = output + "assembly/"
@@ -184,6 +184,9 @@ else:
 	paths = glob.glob("/" + in_dir.strip("/") + "/" + '*.' + input_extension)
 	names = set(file.split("." + input_extension)[0] for file in paths)
 
+if len(names) == 0:
+	raise ValueError("No input files")
+
 #######################################
 # function to calculate tool runtimes #
 #######################################
@@ -247,7 +250,9 @@ def calculate_time(name, step, paired):
 
 def list_depends(name, step, paired):
 	if step == "deconcatenate":
-		return [name + "." + input_extension].extend([scratch_searched + name.split("/")[-1] + "_searched.log" for name in names])
+		depends_list = [name + "." + input_extension]
+		depends_list.extend([scratch_searched + name.split("/")[-1] + "_searched.log" for name in names])
+		return depends_list
 	elif step == "megahit":
 		if paired == "paired":
 			return [str(name + "_paired_1." + input_extension), str(name + "_paired_2." + input_extension), str(name + "_unmatched_1." + input_extension), str(name + "_unmatched_2." + input_extension)]
@@ -395,6 +400,13 @@ if not args.skip_contigs:
 				cores=cores,
 				partition=partition
 				)
+
+if args.skip_contigs:
+	for name in names:
+		if not os.path.isfile(list_targets(name=name, step="megahit", paired=paired)[0]) and os.path.isfile((list_targets(name=name, step="megahit", paired=paired)[0]).strip(".final.contigs.fa") + ".contigs.fa"):
+			workflow.add_task(actions="mv " + (list_targets(name=name, step="megahit", paired=paired)[0]).strip(".final.contigs.fa") + ".contigs.fa " + list_targets(name=name, step="megahit", paired=paired)[0],
+			depends=[(list_targets(name=name, step="megahit", paired=paired)[0]).strip(".final.contigs.fa") + ".contigs.fa"],
+			targets=list_targets(name=name, step="megahit", paired=paired)[0])
 
 ###############################################
 # function to align reads and calculate depth #
@@ -859,14 +871,18 @@ if not os.path.isfile(output + "remove_complete0.done"):
 	workflow.add_task(rm_command, depends=[list_targets(name=name, step="copy_bins", paired=paired)[0] for name in names], targets=output + "remove_complete0.done")
 
 if args.remove_intermediate_files:
-	rm_command = "rm -r " + deconcatenated_dir + " && touch " + output + "remove_complete1.done"
-	workflow.add_task(rm_command, depends=[list_targets(name=name, step="abundance", paired=paired)[0] for name in names], targets=output + "remove_complete1.done")
+	if paired == "concatenated":
+		rm_command = "rm -r " + deconcatenated_dir + " && touch " + output + "remove_complete1.done"
+		workflow.add_task(rm_command, depends=[list_targets(name=name, step="abundance", paired=paired)[0] for name in names], targets=output + "remove_complete1.done")
 	rm_command = "rm -r " + scratch + " && touch " + output + "remove_complete2.done"
 	depends_list = [qa_dir + "checkm_qa_and_n50.tsv"]
 	if not args.skip_placement:
 		depends_list.append(output + "final_profile_" + abundance_type + ".tsv")
 	workflow.add_task(rm_command, depends=depends_list, targets=output + "remove_complete2.done")
-	workflow.add_task("rm " + output + "remove_complete*.done", depends=[output + "remove_complete" + i + ".done" for i in range(3)], targets=output + "remove_complete.done")
+	remove_depends = [output + "remove_complete" + str(i) + ".done" for i in range(3)]
+	if not paired == "concatenated":
+		remove_depends = [remove_depends[0], remove_depends[2]]
+	workflow.add_task("rm " + output + "remove_complete*.done", depends=remove_depends, targets=output + "remove_complete.done")
 
 ####################
 # run the workflow #
