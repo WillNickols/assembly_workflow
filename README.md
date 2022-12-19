@@ -1,3 +1,7 @@
+# assembly_workflow
+
+> This repository contains code for Will's assembly workflow based on Aaron Walsh's pets assembly workflow and Segata et al. 2019. For queries, contact Will Nickols (email: <willnickols@college.harvard.edu>).
+
 # Installation
 
 Install everything manually
@@ -113,4 +117,3 @@ python assembly_workflow.py \
   --grid-options="--account=nguyen_lab" \
   --skip-contigs
 ```
-
