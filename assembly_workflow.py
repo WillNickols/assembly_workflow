@@ -261,9 +261,16 @@ def list_depends(name, step, paired):
 		else:
 			return [str(name + "." + input_extension)]
 	elif step == "align":
-		return [str(contigs_dir + name.split("/")[-1] + "/" + name.split("/")[-1] + ".final.contigs.fa")]
+		depends_list = [str(contigs_dir + name.split("/")[-1] + "/" + name.split("/")[-1] + ".final.contigs.fa")]
+		if args.skip_contigs:
+			depends_list.append(contigs_dir + name.split("/")[-1] + "/" + name.split("/")[-1] + ".done")
+			depends_list.append(str(deconcatenated_dir + name.split("/")[-1] + ".done"))
+		return depends_list
 	elif step == "metabat":
-		return [str(depths_dir + name.split("/")[-1] + ".contig_depths.txt")]
+		depends_list = [str(depths_dir + name.split("/")[-1] + ".contig_depths.txt")]
+		if args.skip_contigs:
+			depends_list.append(str(deconcatenated_dir + name.split("/")[-1] + ".done"))
+		return depends_list
 	elif step == "abundance_sample":
 		if paired == "paired":
 			depends_list = [str(name + "_paired_1." + input_extension), str(name + "_paired_2." + input_extension), str(name + "_unmatched_1." + input_extension), str(name + "_unmatched_2." + input_extension)]
@@ -407,6 +414,10 @@ if args.skip_contigs:
 			workflow.add_task(actions="mv " + (list_targets(name=name, step="megahit", paired=paired)[0]).strip(".final.contigs.fa") + ".contigs.fa " + list_targets(name=name, step="megahit", paired=paired)[0],
 			depends=[(list_targets(name=name, step="megahit", paired=paired)[0]).strip(".final.contigs.fa") + ".contigs.fa"],
 			targets=list_targets(name=name, step="megahit", paired=paired)[0])
+		make_directory(scratch + "assembly/main/" + name.split("/")[-1] + "/")
+		workflow.add_task(actions="cp " + list_targets(name=name, step="megahit", paired=paired)[0] + " " + scratch + "assembly/main/" + name.split("/")[-1] + "/ && touch " + contigs_dir + name.split("/")[-1] + "/" + name.split("/")[-1] + ".done",
+		depends=list_targets(name=name, step="megahit", paired=paired)[0],
+		targets=[contigs_dir + name.split("/")[-1] + "/" + name.split("/")[-1] + ".done"])
 
 ###############################################
 # function to align reads and calculate depth #
@@ -443,7 +454,7 @@ def align(name, paired):
 			a = "mkdir -p " + bowtie2_dir,
 			b = "if [ ! -s " + contigs + " ]; then touch " + bam_sorted + "; else bowtie2-build " + contigs + " " + index,
 			c = "if grep -q -m 1 " + name + " " + list_paired + "; then bowtie2 -x " + index + " -1 " + scratch_deconcatenated + name.split("/")[-1] + "_paired_1.fastq.gz" + " -2 " + scratch_deconcatenated + name.split("/")[-1] + "_paired_2.fastq.gz" + " -U " + scratch_deconcatenated + name.split("/")[-1] + "_unmatched_1.fastq.gz" +
-				"," + scratch_deconcatenated + name.split("/")[-1] + "_unmatched_2.fastq" + " -S " + sam + " -p " + str(cores) + " --very-sensitive-local --no-unal; else bowtie2 -x " + index + " -U " + name + "." + input_extension + " -S " +
+				"," + scratch_deconcatenated + name.split("/")[-1] + "_unmatched_2.fastq.gz" + " -S " + sam + " -p " + str(cores) + " --very-sensitive-local --no-unal; else bowtie2 -x " + index + " -U " + name + "." + input_extension + " -S " +
 				sam + " -p " + str(cores) + " --very-sensitive-local --no-unal; fi",
 			d = "samtools view -bS -F 4 " + sam + " > " + bam_unsorted,
 			e = "samtools sort " + bam_unsorted + " -o " + bam_sorted + " --threads " + str(cores) + "; fi",
@@ -639,7 +650,7 @@ def abundance_dataset(name, paired):
 			command = '''{a} && {b} && {c} && {d} && {e} && {f} && {g} && {h} && {i} && {j}'''.format(
 				a = "mkdir -p " + bowtie2_dir,
 				b = "if [ ! -s " + contigs + " ]; then touch " + bam_sorted + "; else if grep -q -m 1 " + name + " " + list_paired + "; then bowtie2 -x " + index + " -1 " + scratch_deconcatenated + name.split("/")[-1] + "_paired_1.fastq.gz" + " -2 " + scratch_deconcatenated + name.split("/")[-1] + "_paired_2.fastq.gz" + " -U " + scratch_deconcatenated + name.split("/")[-1] + "_unmatched_1.fastq.gz" +
-					"," + scratch_deconcatenated + name.split("/")[-1] + "_unmatched_2.fastq" + " -S " + sam + " -p " + str(cores) + " --very-sensitive-local --no-unal; else bowtie2 -x " + index + " -U " + name + "." + input_extension + " -S " +
+					"," + scratch_deconcatenated + name.split("/")[-1] + "_unmatched_2.fastq.gz" + " -S " + sam + " -p " + str(cores) + " --very-sensitive-local --no-unal; else bowtie2 -x " + index + " -U " + name + "." + input_extension + " -S " +
 					sam + " -p " + str(cores) + " --very-sensitive-local --no-unal; fi",
 				c = "samtools view -bS -F 4 " + sam + " > " + bam_unsorted,
 				d = "samtools sort " + bam_unsorted + " -o " + bam_sorted + " --threads " + str(cores) + "; fi",
@@ -654,7 +665,7 @@ def abundance_dataset(name, paired):
 			command = '''{a} && {b} && {c} && {d} && {e} && {f} && {g} && {h} && {i} && {j}'''.format(
 				a = "mkdir -p " + bowtie2_dir,
 				b = "if [ ! -s " + contigs + " ]; then touch " + bam_sorted + "; else if grep -q -m 1 " + name + " " + list_paired + "; then bowtie2 -x " + index + " -1 " + scratch_deconcatenated + name.split("/")[-1] + "_paired_1.fastq.gz" + " -2 " + scratch_deconcatenated + name.split("/")[-1] + "_paired_2.fastq.gz" + " -U " + scratch_deconcatenated + name.split("/")[-1] + "_unmatched_1.fastq.gz" +
-					"," + scratch_deconcatenated + name.split("/")[-1] + "_unmatched_2.fastq" + " -S " + sam + " -p " + str(cores) + " --very-sensitive-local --no-unal; else bowtie2 -x " + index + " -U " + name + "." + input_extension + " -S " +
+					"," + scratch_deconcatenated + name.split("/")[-1] + "_unmatched_2.fastq.gz" + " -S " + sam + " -p " + str(cores) + " --very-sensitive-local --no-unal; else bowtie2 -x " + index + " -U " + name + "." + input_extension + " -S " +
 					sam + " -p " + str(cores) + " --very-sensitive-local --no-unal; fi",
 				c = "samtools view -bS -F 4 " + sam + " > " + bam_unsorted,
 				d = "samtools sort " + bam_unsorted + " -o " + bam_sorted + " --threads " + str(cores) + "; fi",
@@ -882,7 +893,7 @@ if args.remove_intermediate_files:
 	remove_depends = [output + "remove_complete" + str(i) + ".done" for i in range(3)]
 	if not paired == "concatenated":
 		remove_depends = [remove_depends[0], remove_depends[2]]
-	workflow.add_task("rm " + output + "remove_complete*.done", depends=remove_depends, targets=output + "remove_complete.done")
+	workflow.add_task("rm " + output + "remove_complete*.done && touch " + output + "remove_complete.done", depends=remove_depends, targets=output + "remove_complete.done")
 
 ####################
 # run the workflow #
