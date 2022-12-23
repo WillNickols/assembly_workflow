@@ -15,8 +15,8 @@ workflow.add_argument("mem", desc="The maximum memory in megabytes allocated to 
 workflow.add_argument("input-extension", desc="the input file extension", default="fastq.gz")
 workflow.add_argument("time", desc="The maximum time in minutes allocated to run any individual command", type=int, default=10000)
 workflow.add_argument("paired", desc="Whether the inputs are \"unpaired\", \"paired\", or \"concatenated\"", default="paired")
-workflow.add_argument("pair-identifier", desc="extension to identify the first file in a pair like _R1; \"kneaddata_default\" looks for _paired_1, _paired_2, _unmatched_1, and _unmatched_2 by default", "kneaddata_default")
-workflow.add_argument("skip-contigs", desc="Whether to skip MEGAHIT, contigs should be in $OUTPUT_DIRECTORY/assembly/main/$SAMPLE_NAME/$SAMPLE_NAME.final.contigs.fa or $OUTPUT_DIRECTORY/assembly/main/$SAMPLE_NAME/$SAMPLE_NAME.contigs.fa", action="store_true")
+workflow.add_argument("pair-identifier", desc="extension to identify the first file in a pair like _R1; \"kneaddata_default\" looks for _paired_1, _paired_2, _unmatched_1, and _unmatched_2 by default", default="kneaddata_default")
+workflow.add_argument("skip-contigs", desc="Whether to skip MEGAHIT, contigs should be in $OUTPUT_DIRECTORY/assembly/main/$SAMPLE_NAME/$SAMPLE_NAME.contigs.fa", action="store_true")
 workflow.add_argument("skip-placement", desc="Whether to stop after checkm steps", action="store_true")
 workflow.add_argument("remove-intermediate-output", desc="Remove intermediate files", action="store_true")
 workflow.add_argument("min-contig-length", desc='MEGAHIT --min-contig-length and MetaBAT -m parameter', default=1500)
@@ -71,104 +71,121 @@ try:
 except:
 	raise ValueError("--abundance must be by_sample or by_dataset")
 
+# list the input fastq files
+in_dir = args.input
+
+# Get filepath without paired/unpaired ending
+if paired == "paired":
+	paths = glob.glob(os.path.abspath(in_dir.rstrip("/")) + "/" + '*.' + input_extension)
+	if pair_identifier == "kneaddata_default":
+		names = set(file.split('_paired_1')[0].split('_paired_2')[0].split('_unmatched_1')[0].split('_unmatched_2')[0] for file in paths)
+	else:
+		names = set(file.split(pair_identifier)[0].split(pair_identifier_2)[0] for file in paths)
+else:
+	paths = glob.glob(os.path.abspath(in_dir.rstrip("/")) + "/" + '*.' + input_extension)
+	names = set(file.split("." + input_extension)[0] for file in paths)
+
+if len(names) == 0:
+	raise ValueError("No input files")
+
 # output
-original_output = os.path.abspath(args.output.strip("/")) + "/"
-os.makedirs(original_output, exist_ok=true)
+original_output = os.path.abspath(args.output.rstrip("/")) + "/"
+os.makedirs(original_output, exist_ok=True)
 
 output = original_output + "main/"
-os.makedirs(output, exist_ok=true)
+os.makedirs(output, exist_ok=True)
 
 # scratch directory
 if args.grid_scratch:
-	scratch = os.path.abspath(args.grid_scratch.strip("/")) + "/main/"
+	scratch = os.path.abspath(args.grid_scratch.rstrip("/")) + "/main/"
 else:
 	scratch = output + "scratch/"
-os.makedirs(scratch, exist_ok=true)
+os.makedirs(scratch, exist_ok=True)
 
 deconcatenated_dir = output + "deconcatenated/"
 if paired == "concatenated":
 	scratch_searched = scratch + "searched/"
-	os.makedirs(scratch_searched, exist_ok=true)
+	os.makedirs(scratch_searched, exist_ok=True)
 
 	scratch_deconcatenated = scratch + "deconcatenated/"
-	os.makedirs(scratch_deconcatenated, exist_ok=true)
+	os.makedirs(scratch_deconcatenated, exist_ok=True)
 
-	os.makedirs(deconcatenated_dir, exist_ok=true)
+	os.makedirs(deconcatenated_dir, exist_ok=True)
 
 assembly_dir = output + "assembly/"
-os.makedirs(assembly_dir, exist_ok=true)
+os.makedirs(assembly_dir, exist_ok=True)
 
 megahit_scratch = scratch + "megahit/"
-os.makedirs(megahit_scratch, exist_ok=true)
+os.makedirs(megahit_scratch, exist_ok=True)
 
 contigs_dir = assembly_dir + "main/"
-os.makedirs(contigs_dir, exist_ok=true)
+os.makedirs(contigs_dir, exist_ok=True)
 
 mags_scratch = scratch + "bins/"
-os.makedirs(mags_scratch, exist_ok=true)
+os.makedirs(mags_scratch, exist_ok=True)
 
 bowtie2_tmp = scratch + "bowtie2_tmp/"
-os.makedirs(bowtie2_tmp, exist_ok=true)
+os.makedirs(bowtie2_tmp, exist_ok=True)
 
 bowtie2_global_dir = scratch + "bowtie2_global_dir/"
-os.makedirs(bowtie2_global_dir, exist_ok=true)
+os.makedirs(bowtie2_global_dir, exist_ok=True)
 
 depths_dir = assembly_dir + "contig_depths/"
-os.makedirs(depths_dir, exist_ok=true)
+os.makedirs(depths_dir, exist_ok=True)
 
 bins_dir = output + "bins/"
-os.makedirs(bins_dir, exist_ok=true)
+os.makedirs(bins_dir, exist_ok=True)
 
 abundance_dir = output + "abundance_" + abundance_type + "/"
-os.makedirs(abundance_dir, exist_ok=true)
+os.makedirs(abundance_dir, exist_ok=True)
 
 checkm_dir = output + "checkm/"
-os.makedirs(checkm_dir, exist_ok=true)
+os.makedirs(checkm_dir, exist_ok=True)
 
 checkm_scratch = scratch + "checkm/"
-os.makedirs(checkm_scratch, exist_ok=true)
+os.makedirs(checkm_scratch, exist_ok=True)
 
 checkm_qa_scratch = checkm_scratch + "qa_unmerged/"
-os.makedirs(checkm_qa_scratch, exist_ok=true)
+os.makedirs(checkm_qa_scratch, exist_ok=True)
 
 checkm_bins_dir_scratch = checkm_scratch + "bins/"
-os.makedirs(checkm_bins_dir_scratch, exist_ok=true)
+os.makedirs(checkm_bins_dir_scratch, exist_ok=True)
 
 checkm_n50_dir = checkm_dir + "n50/"
-os.makedirs(checkm_n50_dir, exist_ok=true)
+os.makedirs(checkm_n50_dir, exist_ok=True)
 
 qa_unmerged_dir = checkm_dir + "qa_unmerged/"
-os.makedirs(qa_unmerged_dir, exist_ok=true)
+os.makedirs(qa_unmerged_dir, exist_ok=True)
 
 qa_dir = checkm_dir + "qa/"
-os.makedirs(qa_dir, exist_ok=true)
+os.makedirs(qa_dir, exist_ok=True)
 
 if not args.skip_placement:
 	phylophlan_scratch = scratch + "phylophlan/"
-	os.makedirs(phylophlan_scratch, exist_ok=true)
+	os.makedirs(phylophlan_scratch, exist_ok=True)
 
 	phylophlan_dir = output + "phylophlan/"
-	os.makedirs(phylophlan_dir, exist_ok=true)
+	os.makedirs(phylophlan_dir, exist_ok=True)
 
 	phylophlan_unmerged_dir = phylophlan_dir + "unmerged/"
-	os.makedirs(phylophlan_unmerged_dir, exist_ok=true)
+	os.makedirs(phylophlan_unmerged_dir, exist_ok=True)
 
 	phylophlan_unmerged_scratch = phylophlan_scratch + "unmerged/"
-	os.makedirs(phylophlan_unmerged_scratch, exist_ok=true)
+	os.makedirs(phylophlan_unmerged_scratch, exist_ok=True)
 
 	sgb_dir = output + "sgbs/"
-	os.makedirs(sgb_dir, exist_ok=true)
+	os.makedirs(sgb_dir, exist_ok=True)
 
 	mash_dir = sgb_dir + "mash/"
-	os.makedirs(mash_dir, exist_ok=true)
+	os.makedirs(mash_dir, exist_ok=True)
 
 	sgbs_scratch = scratch + "sgbs/"
-	os.makedirs(sgbs_scratch, exist_ok=true)
+	os.makedirs(sgbs_scratch, exist_ok=True)
 
 	sgbs = sgb_dir + "sgbs/"
 
 	map_out = sgbs_scratch + "abundances/"
-	os.makedirs(map_out, exist_ok=true)
+	os.makedirs(map_out, exist_ok=True)
 
 # grid
 memory = args.mem
@@ -176,23 +193,6 @@ cores = args.cores
 partition = args.grid_partition
 max_time = args.time
 local_jobs = args.jobs
-
-# list the input fastq files
-in_dir = args.input
-
-# Get filepath without paired/unpaired ending
-if paired == "paired":
-	paths = glob.glob(os.path.abspath(in_dir.strip("/")) + "/" + '*.' + input_extension)
-	if pair_identifier == "kneaddata_default":
-		names = set(file.split('_paired_1')[0].split('_paired_2')[0].split('_unmatched_1')[0].split('_unmatched_2')[0] for file in paths)
-	else:
-		names = set(file.split(pair_identifier)[0].split(pair_identifier_2)[0] for file in paths)
-else:
-	paths = glob.glob(os.path.abspath(in_dir.strip("/")) + "/" + '*.' + input_extension)
-	names = set(file.split("." + input_extension)[0] for file in paths)
-
-if len(names) == 0:
-	raise ValueError("No input files")
 
 #######################################
 # function to calculate tool runtimes #
@@ -210,9 +210,9 @@ def calculate_time(name, step, paired):
 			else:
 				time = 5 * sum([math.ceil(os.path.getsize(name + pair_identifier + "." + input_extension) / (1024 * 1024 * 1024.0)) for name in names])
 		elif paired == "unpaired":
-			time = 3 * sum([math.ceil(os.path.getsize(name "." + input_extension) / (1024 * 1024 * 1024.0)) for name in names])
+			time = 3 * sum([math.ceil(os.path.getsize(name + "." + input_extension) / (1024 * 1024 * 1024.0)) for name in names])
 		elif paired == "concatenated":
-			time = 3 * sum([math.ceil(os.path.getsize(name "." + input_extension) / (1024 * 1024 * 1024.0)) for name in names])
+			time = 3 * sum([math.ceil(os.path.getsize(name + "." + input_extension) / (1024 * 1024 * 1024.0)) for name in names])
 		time = time + 30
 	elif paired == "paired":
 		if pair_identifier == "kneaddata_default":
@@ -447,12 +447,13 @@ if args.skip_contigs:
 	for name in names:
 		# If skipping contig generation, move and rename the contigs necessary
 		if not os.path.isfile(list_targets(name=name, step="megahit", paired=paired)[0]) and os.path.isfile(original_output + "assembly/main/" + name.split("/")[-1] + "/" + name.split("/")[-1] + ".contigs.fa"):
+			os.makedirs(list_targets(name=name, step="megahit", paired=paired)[0].rsplit("/", 1)[0], exist_ok=True)
 			workflow.add_task(actions="cp " + original_output + "assembly/main/" + name.split("/")[-1] + "/" + name.split("/")[-1] + ".contigs.fa " + list_targets(name=name, step="megahit", paired=paired)[0],
 			depends=[original_output + "assembly/main/" + name.split("/")[-1] + "/" + name.split("/")[-1] + ".contigs.fa"],
 			targets=list_targets(name=name, step="megahit", paired=paired)[0],
 			name="Copy contigs")
 		# Copy contigs to scratch
-		os.makedirs(scratch + "assembly/main/" + name.split("/")[-1] + "/", exist_ok=true)
+		os.makedirs(scratch + "assembly/main/" + name.split("/")[-1] + "/", exist_ok=True)
 		workflow.add_task(actions="cp " + list_targets(name=name, step="megahit", paired=paired)[0] + " " + scratch + "assembly/main/" + name.split("/")[-1] + "/ && touch " + contigs_dir + name.split("/")[-1] + "/" + name.split("/")[-1] + ".done",
 		depends=list_targets(name=name, step="megahit", paired=paired)[0],
 		targets=[contigs_dir + name.split("/")[-1] + "/" + name.split("/")[-1] + ".done"],
@@ -828,7 +829,7 @@ if args.gc_length_stats and not os.path.isdir(qa_dir + "GC_content.tsv"):
 def copy_bins(name):
 	metabat_out = bins_dir + name.split("/")[-1] + "/bins/"
 	checkm_bin_name = checkm_bins_dir_scratch + name.split("/")[-1] + "/bins/"
-	os.makedirs(checkm_bin_name, exist_ok=true)
+	os.makedirs(checkm_bin_name, exist_ok=True)
 	command = '''{a} && {b}'''.format(
 		a = "if ls " + metabat_out + "*.bin.[0-9]*.fa; then cp " + metabat_out + "*.bin.[0-9]*.fa " + checkm_bin_name + "; fi",
 		b = "touch [targets[0]]"
@@ -850,10 +851,14 @@ workflow.add_task(n50, targets=checkm_n50_dir + "mags_n50.tsv", depends=[list_ta
 for name in names:
 	checkm_bin_name = checkm_bins_dir_scratch + name.split("/")[-1] + "/bins/"
 	metabat_out = bins_dir + name.split("/")[-1] + "/bins/"
-	os.makedirs(checkm_qa_scratch + name.split("/")[-1] + "/", exist_ok=true)
-	os.makedirs(qa_unmerged_dir + name.split("/")[-1] + "/", exist_ok=true)
-	command = "if ls " + metabat_out + "*.bin.[0-9]*.fa; then " + this_folder + "checkm2/bin/checkm2 predict -x fa --input " + checkm_bin_name + " --output-directory " + checkm_qa_scratch + name.split("/")[-1] + "/" + " --threads " + str(args.cores) + " " + args.checkm_predict_options + "; " + \
-		"else echo -e \"Name\tCompleteness\tContamination\tCompleteness_Model_Used\tTranslation_Table_Used\tCoding_Density\tContig_N50\tAverage_Gene_Length\tGenome_Size\tGC_Content\tTotal_Coding_Sequences\tAdditional_Notes\" > " + qa_unmerged_dir + name.split("/")[-1] + "/quality_report.tsv; fi"
+	os.makedirs(checkm_qa_scratch + name.split("/")[-1] + "/", exist_ok=True)
+	os.makedirs(qa_unmerged_dir + name.split("/")[-1] + "/", exist_ok=True)
+	if args.grid_jobs > 0:
+		command = "if ls " + metabat_out + "*.bin.[0-9]*.fa; then " + this_folder + "checkm2/bin/checkm2 predict -x fa --input " + checkm_bin_name + " --output-directory " + checkm_qa_scratch + name.split("/")[-1] + "/" + " --threads " + str(args.cores) + " " + args.checkm_predict_options + "; " + \
+			"else echo -e \"Name\tCompleteness\tContamination\tCompleteness_Model_Used\tTranslation_Table_Used\tCoding_Density\tContig_N50\tAverage_Gene_Length\tGenome_Size\tGC_Content\tTotal_Coding_Sequences\tAdditional_Notes\" > " + qa_unmerged_dir + name.split("/")[-1] + "/quality_report.tsv; fi"
+	else:
+		command = "if ls " + metabat_out + "*.bin.[0-9]*.fa; then " + this_folder + "checkm2/bin/checkm2 predict -x fa --input " + checkm_bin_name + " --output-directory " + qa_unmerged_dir + name.split("/")[-1] + "/" + " --threads " + str(args.cores) + " " + args.checkm_predict_options + "; " + \
+			"else echo -e \"Name\tCompleteness\tContamination\tCompleteness_Model_Used\tTranslation_Table_Used\tCoding_Density\tContig_N50\tAverage_Gene_Length\tGenome_Size\tGC_Content\tTotal_Coding_Sequences\tAdditional_Notes\" > " + qa_unmerged_dir + name.split("/")[-1] + "/quality_report.tsv; fi"
 	workflow.add_task_gridable(actions=command,
 	depends=list_targets(name=name, step="copy_bins", paired=paired),
 	targets=qa_unmerged_dir + name.split("/")[-1] + "/quality_report.tsv",
@@ -863,23 +868,19 @@ for name in names:
 	partition=partition,
 	name="Assess bin quality with checkm2 for " + name.split("/")[-1])
 
+command = ""
+depends_list = []
 for count, name in enumerate(names):
 	if count == 0:
-		workflow.add_task("cat " + qa_unmerged_dir + name.split("/")[-1] + "/quality_report.tsv > " + qa_dir + "quality_report_tmp_0.tsv",
-		depends = qa_unmerged_dir + name.split("/")[-1] + "/quality_report.tsv",
-		targets = qa_dir + "quality_report_tmp_0.tsv",
-		name="Merge checkm2 quality reports"
-		)
+		command = "cat " + qa_unmerged_dir + name.split("/")[-1] + "/quality_report.tsv > " + qa_dir + "quality_report.tsv"
+		depends_list.append(qa_unmerged_dir + name.split("/")[-1] + "/quality_report.tsv")
 	else:
-		workflow.add_task("cat " + qa_dir + "quality_report_tmp_" + str(count - 1) + ".tsv > " + qa_dir + "quality_report_tmp_" + str(count) + ".tsv && tail -n +2 " + qa_unmerged_dir + name.split("/")[-1] + "/quality_report.tsv >> " + qa_dir + "quality_report_tmp_" + str(count) + ".tsv && rm " + qa_dir + "quality_report_tmp_" + str(count - 1) + ".tsv",
-		depends = [qa_dir + "quality_report_tmp_" + str(count - 1) + ".tsv", qa_unmerged_dir + name.split("/")[-1] + "/quality_report.tsv"],
-		targets = qa_dir + "quality_report_tmp_" + str(count) + ".tsv",
-		name="Merge checkm2 quality reports"
-		)
-workflow.add_task("mv " + qa_dir + "quality_report_tmp_" + str(len(names) - 1) + ".tsv " + qa_dir + "quality_report.tsv",
-depends = qa_dir + "quality_report_tmp_" + str(len(names) - 1) + ".tsv",
+		command = command + " && tail -n +2 " + qa_unmerged_dir + name.split("/")[-1] + "/quality_report.tsv >> " + qa_dir + "quality_report.tsv"
+		depends_list.append(qa_unmerged_dir + name.split("/")[-1] + "/quality_report.tsv")
+workflow.add_task(command,
+depends = depends_list,
 targets = qa_dir + "quality_report.tsv",
-name="Rename checkm2 quality report"
+name="Merge checkm2 quality report"
 )
 
 workflow.add_task("python " + assembly_tasks_folder + "checkm_wrangling.py --checkm-qa " + qa_dir + "quality_report.tsv" + " --n50 " + checkm_n50_dir + "mags_n50.tsv" + " --out_file " + qa_dir + "checkm_qa_and_n50.tsv" + " --completeness " + str(args.completeness) + " --contamination " + str(args.contamination),
@@ -893,12 +894,16 @@ if not args.skip_placement:
 	# run PhyloPhlAn #
 	##################
 	for name in names:
-		os.makedirs(phylophlan_unmerged_scratch + name.split("/")[-1] + "/", exist_ok=true)
-		os.makedirs(phylophlan_unmerged_dir + name.split("/")[-1] + "/", exist_ok=true)
+		os.makedirs(phylophlan_unmerged_scratch + name.split("/")[-1] + "/", exist_ok=True)
+		os.makedirs(phylophlan_unmerged_dir + name.split("/")[-1] + "/", exist_ok=True)
 		metabat_out = bins_dir + name.split("/")[-1] + "/bins/"
 		checkm_bin_name = checkm_bins_dir_scratch + name.split("/")[-1] + "/bins/"
-		command = "if ls " + metabat_out + "*.bin.[0-9]*.fa; then phylophlan_metagenomic -i " + checkm_bin_name + " -n 1 --add_ggb --add_fgb -d " + database + " -o " + phylophlan_unmerged_scratch + name.split("/")[-1] + "/" + "phylophlan_out --nproc " + str(cores) + " --verbose -e fa --database_folder " + database_folder + " " + args.phylophlan_metagenomic_options + "; " + \
-			"else echo -e \"line1\nline2\nline3\n#mag\tsgb\tggb\tfgb\tref\" > " + phylophlan_unmerged_dir + name.split("/")[-1] + "/" + "phylophlan_out.tsv; fi"
+		if args.grid_jobs > 0:
+			command = "if ls " + metabat_out + "*.bin.[0-9]*.fa; then phylophlan_metagenomic -i " + checkm_bin_name + " -n 1 --add_ggb --add_fgb -d " + database + " -o " + phylophlan_unmerged_scratch + name.split("/")[-1] + "/" + "phylophlan_out --nproc " + str(cores) + " --verbose -e fa --database_folder " + database_folder + " " + args.phylophlan_metagenomic_options + "; " + \
+				"else echo -e \"line1\nline2\nline3\n#mag\tsgb\tggb\tfgb\tref\" > " + phylophlan_unmerged_dir + name.split("/")[-1] + "/" + "phylophlan_out.tsv; fi"
+		else:
+			command = "if ls " + metabat_out + "*.bin.[0-9]*.fa; then phylophlan_metagenomic -i " + checkm_bin_name + " -n 1 --add_ggb --add_fgb -d " + database + " -o " + phylophlan_unmerged_dir + name.split("/")[-1] + "/" + "phylophlan_out --nproc " + str(cores) + " --verbose -e fa --database_folder " + database_folder + " " + args.phylophlan_metagenomic_options + "; " + \
+				"else echo -e \"line1\nline2\nline3\n#mag\tsgb\tggb\tfgb\tref\" > " + phylophlan_unmerged_dir + name.split("/")[-1] + "/" + "phylophlan_out.tsv; fi"
 		workflow.add_task_gridable(actions=command,
 		depends=list_targets(name=name, step="copy_bins", paired=paired),
 		targets=phylophlan_unmerged_dir + name.split("/")[-1] + "/" + "phylophlan_out.tsv",
@@ -908,23 +913,19 @@ if not args.skip_placement:
 		partition=partition,
 		name="Run PhyloPhlAn metagenomic on " + name.split("/")[-1])
 
+	command = ""
+	depends_list = []
 	for count, name in enumerate(names):
 		if count == 0:
-			workflow.add_task("cat " + phylophlan_unmerged_dir + name.split("/")[-1] + "/" + "phylophlan_out.tsv > " + phylophlan_dir + "phylophlan_out_tmp_0.tsv",
-			depends = phylophlan_unmerged_dir + name.split("/")[-1] + "/" + "phylophlan_out.tsv",
-			targets = phylophlan_dir + "phylophlan_out_tmp_0.tsv",
-			name="Merge PhyloPhlAn outputs"
-			)
+			command = "cat " + phylophlan_unmerged_dir + name.split("/")[-1] + "/" + "phylophlan_out.tsv > " + phylophlan_dir + "phylophlan_out.tsv"
+			depends_list.append(phylophlan_unmerged_dir + name.split("/")[-1] + "/" + "phylophlan_out.tsv")
 		else:
-			workflow.add_task("cat " + phylophlan_dir + "phylophlan_out_tmp_" + str(count - 1) + ".tsv > " + phylophlan_dir + "phylophlan_out_tmp_" + str(count) + ".tsv && tail -n +5 " + phylophlan_unmerged_dir + name.split("/")[-1] + "/" + "phylophlan_out.tsv >> " + phylophlan_dir + "phylophlan_out_tmp_" + str(count) + ".tsv && rm " + phylophlan_dir + "phylophlan_out_tmp_" + str(count - 1) + ".tsv",
-			depends = [phylophlan_dir + "phylophlan_out_tmp_" + str(count - 1) + ".tsv", phylophlan_unmerged_dir + name.split("/")[-1] + "/" + "phylophlan_out.tsv"],
-			targets = phylophlan_dir + "phylophlan_out_tmp_" + str(count) + ".tsv",
-			name="Merge PhyloPhlAn outputs"
-			)
-	workflow.add_task("mv " + phylophlan_dir + "phylophlan_out_tmp_" + str(len(names) - 1) + ".tsv " + phylophlan_dir + "phylophlan_out.tsv",
-	depends = phylophlan_dir + "phylophlan_out_tmp_" + str(len(names) - 1) + ".tsv",
+			command = command + " && tail -n +5 " + phylophlan_unmerged_dir + name.split("/")[-1] + "/" + "phylophlan_out.tsv >> " + phylophlan_dir + "phylophlan_out.tsv"
+			depends_list.append(phylophlan_unmerged_dir + name.split("/")[-1] + "/" + "phylophlan_out.tsv")
+	workflow.add_task(command,
+	depends = depends_list,
 	targets = phylophlan_dir + "phylophlan_out.tsv",
-	name="Rename PhyloPhlAn output"
+	name="Merge PhyloPhlAn quality report"
 	)
 
 	workflow.add_task("python " + assembly_tasks_folder + "phylophlan_add_tax_assignment.py --table " + phylophlan_dir + "phylophlan_out.tsv" + " --output " + phylophlan_dir + "phylophlan_relab.tsv",
@@ -985,7 +986,7 @@ if args.remove_intermediate_output:
 	rm_command = "rm -r " + scratch + " && touch " + output + "remove_scratch.done"
 	depends_list = [qa_dir + "checkm_qa_and_n50.tsv"]
 	if not args.skip_placement:
-		depends_list.append(output + "final_profile_" + abundance_type + ".tsv")
+		depends_list.append(original_output + "final_profile_" + abundance_type + ".tsv")
 	workflow.add_task(rm_command, depends=depends_list, targets=output + "remove_scratch.done", name="Remove scratch files")
 
 ####################
