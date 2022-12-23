@@ -59,7 +59,7 @@ python assembly_workflow.py \
   --grid-options="--account=nguyen_lab"
 ```
 
-This command runs a paired-end `fastq` file.
+This command runs a paired-end `fastq` file.  Read headers should end with "/1" or "/2" if the files are paired (e.g. `@read_57/1` and `@read_57/2`).
 ```
 python assembly_workflow.py \
   -i /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/mags_and_sgbs_pipeline_testing/test_inputs/paired_end/ \
@@ -72,7 +72,7 @@ python assembly_workflow.py \
   --grid-options="--account=nguyen_lab"
 ```
 
-This command runs two concatenated `fastq.gz` files, one of which is single-end and one of which is paired-end.
+This command runs two concatenated `fastq.gz` files, one of which is single-end and one of which is paired-end.  These read headers should also end with "/1" and "/2" to indicate pairing.  Files from Kneaddata automatically satisfy this requirement.
 ```
 python assembly_workflow.py \
   -i /n/holylfs05/LABS/nguyen_lab/Everyone/wnickols/mags_and_sgbs_pipeline_testing/test_inputs/concat/ \
