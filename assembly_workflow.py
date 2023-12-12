@@ -580,8 +580,7 @@ def abundance_sample(name, paired):
 					f = "paired2=$(echo $(zcat " + name + "_paired_2." + input_extension + "|wc -l)/4|bc)",
 					g = "unpaired1=$(echo $(zcat " + name + "_unmatched_1." + input_extension + "|wc -l)/4|bc)",
 					h = "unpaired2=$(echo $(zcat " + name + "_unmatched_2." + input_extension + "|wc -l)/4|bc)",
-					i = "echo $((paired1+paired2+unpaired1+unpaired2)) &>> [targets[2]]",
-					j = "rm -r " + bowtie2_dir
+					i = "echo $((paired1+paired2+unpaired1+unpaired2)) &>> [targets[2]]"
 					)
 			else:
 				command = '''{a} && {b} && {c} && {d} && {e} && {f} && {i} && {j}'''.format(
@@ -591,8 +590,7 @@ def abundance_sample(name, paired):
 					d = "samtools view -c -F 260 " + bam_sorted + " -o [targets[2]]; fi",
 					e = "paired1=$(echo $(zcat " + name + pair_identifier + "." + input_extension + "|wc -l)/4|bc)",
 					f = "paired2=$(echo $(zcat " + name + pair_identifier_2 + "." + input_extension + "|wc -l)/4|bc)",
-					i = "echo $((paired1+paired2)) &>> [targets[2]]",
-					j = "rm -r " + bowtie2_dir
+					i = "echo $((paired1+paired2)) &>> [targets[2]]"
 					)
 		elif input_extension in ["fastq", "fq"]:
 			if pair_identifier == "kneaddata_default":
@@ -605,8 +603,7 @@ def abundance_sample(name, paired):
 					f = "paired2=$(echo $(cat " + name + "_paired_2." + input_extension + "|wc -l)/4|bc)",
 					g = "unpaired1=$(echo $(cat " + name + "_unmatched_1." + input_extension + "|wc -l)/4|bc)",
 					h = "unpaired2=$(echo $(cat " + name + "_unmatched_2." + input_extension + "|wc -l)/4|bc)",
-					i = "echo $((paired1+paired2+unpaired1+unpaired2)) &>> [targets[2]]",
-					j = "rm -r " + bowtie2_dir
+					i = "echo $((paired1+paired2+unpaired1+unpaired2)) &>> [targets[2]]"
 					)
 			else:
 				command = '''{a} && {b} && {c} && {d} && {e} && {f} && {i} && {j}'''.format(
@@ -616,8 +613,7 @@ def abundance_sample(name, paired):
 					d = "samtools view -c -F 260 " + bam_sorted + " -o [targets[2]]; fi",
 					e = "paired1=$(echo $(cat " + name + pair_identifier + "." + input_extension + "|wc -l)/4|bc)",
 					f = "paired2=$(echo $(cat " + name + pair_identifier_2 + "." + input_extension + "|wc -l)/4|bc)",
-					i = "echo $((paired1+paired2)) &>> [targets[2]]",
-					j = "rm -r " + bowtie2_dir
+					i = "echo $((paired1+paired2)) &>> [targets[2]]"
 					)
 	elif paired in ["unpaired", "concatenated"]:
 		if input_extension in ["fastq.gz", "fq.gz"]:
@@ -626,8 +622,7 @@ def abundance_sample(name, paired):
 				b = "python " + assembly_tasks_folder + "checkm.py coverage " + bin + " [targets[0]] " + bam_sorted + " -x fa -t " + str(cores) + " -r " + args.checkm_coverage_options,
 				c = "python " + assembly_tasks_folder + "checkm.py profile [targets[0]] --tab_table -f [targets[1]]",
 				d = "samtools view -c -F 260 " + bam_sorted + " -o [targets[2]]; fi",
-				e = "echo $(zcat " + name + "." + input_extension + "|wc -l)/4|bc &>> [targets[2]]",
-				f = "rm -r " + bowtie2_dir
+				e = "echo $(zcat " + name + "." + input_extension + "|wc -l)/4|bc &>> [targets[2]]"
 				)
 		elif input_extension in ["fastq", "fq"]:
 			command = '''{a} && {b} && {c} && {d} && {e} && {f} '''.format(
@@ -635,8 +630,7 @@ def abundance_sample(name, paired):
 				b = "python " + assembly_tasks_folder + "checkm.py coverage " + bin + " [targets[0]] " + bam_sorted + " -x fa -t " + str(cores) + " -r " + args.checkm_coverage_options,
 				c = "python " + assembly_tasks_folder + "checkm.py profile [targets[0]] --tab_table -f [targets[1]]",
 				d = "samtools view -c -F 260 " + bam_sorted + " -o [targets[2]]; fi",
-				e = "echo $(cat " + name + "." + input_extension + "|wc -l)/4|bc &>> [targets[2]]",
-				f = "rm -r " + bowtie2_dir
+				e = "echo $(cat " + name + "." + input_extension + "|wc -l)/4|bc &>> [targets[2]]"
 				)
 	return str(command)
 
