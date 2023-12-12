@@ -308,10 +308,12 @@ def list_depends(name, step, paired):
 			else:
 				depends_list = [str(name + pair_identifier + "." + input_extension), str(name + pair_identifier_2 + "." + input_extension)]
 			depends_list.append(str(bins_dir + name.split("/")[-1] + ".done"))
+			depends_list.append(str(depths_dir + name.split("/")[-1] + ".contig_depths.txt"))
 			return depends_list
 		else:
 			depends_list = [str(name + "." + input_extension)]
 			depends_list.append(str(bins_dir + name.split("/")[-1] + ".done"))
+			depends_list.append(str(depths_dir + name.split("/")[-1] + ".contig_depths.txt"))
 			return depends_list
 	elif step == "copy_bins":
 		return [str(bins_dir + name.split("/")[-1] + ".done")]
