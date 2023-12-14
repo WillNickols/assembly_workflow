@@ -803,7 +803,7 @@ if abundance_type == "by_sample":
 			partition=partition,
 			name="Calculate by-sample abundance for " + name.split("/")[-1]
 			)
-		workflow.add_task_local(actions=command2,
+		workflow.add_task(actions=command2,
 			depends=list_targets(name=name, step="abundance", paired=paired),
 			targets=list_targets(name=name, step="abundance2", paired=paired),
 			name="Add on full read count for " + name.split("/")[-1]
