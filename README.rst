@@ -57,8 +57,8 @@ The following command runs the workflow on a set of paired-end fastq files that 
       --input-extension fastq.gz \
       --paired paired \
       --pair-identifier _R1 \
-      --cores 8 \
-      --local-jobs 12 \
+      --cores 4 \
+      --local-jobs 8 \
       --remove-intermediate-output
 
 **Abundance output**
@@ -71,11 +71,11 @@ The output, ``example/output/sample_1/final_profile_by_sample.tsv`` is a MetaPhl
 
 **Phylogenetic output**
 ^^^^^^^^^^^^^^^^^^^^
-The output shows that *Pseudoalteromonas marina* is present in the sample along with the assembled genome ``sgb_01`` representing a new species genome bin (SGB). We can check the PhyloPhlAn placement of this new SGB by examining ``example/output/sample_1/main/phylophlan/phlophlan_relab.tsv``:
+The output shows that *Pseudoalteromonas marina* is present in the sample along with the assembled genome ``sgb_01`` representing a new species genome bin (SGB). We can check the PhyloPhlAn placement of this new SGB by examining ``example/output/sample_1/main/phylophlan/phylophlan_relab.tsv``:
 
 ::
 
-    head example/output/sample_1/main/phylophlan/phlophlan_relab.tsv
+    head example/output/sample_1/main/phylophlan/phylophlan_relab.tsv
 
 This confirms that the closest SGB, GGB, and FGB have Mash distances of more than 0.05, 0.15, and 0.3 respectively. 
 
@@ -106,8 +106,8 @@ We might want to create genome bins after running a standard biobakery workflow.
       --input-extension fastq.gz \
       --paired concatenated \
       --skip-contigs \
-      --cores 8 \
-      --local-jobs 12 \
+      --cores 4 \
+      --local-jobs 8 \
       --remove-intermediate-output
 
 **Example 3**
@@ -138,7 +138,8 @@ Samples 2 and 4 had MAGs that were close enough that they were merged into the s
 Finally, we can visualize how much of each sample's abundance is made of known microbes, new SGBs, and unknown microbes. The following script will produce a ``figures`` folder in the ``tutorial`` folder, from which you can examine the unknown abundance.
 
 ::
-                            
+
+    cd tutorial/
     Rscript abundance_script.R
 
 We can see that the vast majority of most samples consists of unknown genetic material. Patially, this is due to the fact that wild animal guts are not very well characterized, but it is also due to the fact that assembly methods tend to have low recall. 
