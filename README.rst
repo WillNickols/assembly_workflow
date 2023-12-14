@@ -11,7 +11,7 @@ This repository contains code for Will's assembly workflow based on Aaron Walsh'
 **Installation**
 ................
 
-The workflow can be installed with the following commands.  It is okay if the Checkm2 database install throws an error starting with ``File "checkm2", line 244, in <module>...``.  The PhyloPhlAn run will intentionally fail in order to download the database but will take a while to download the database.
+The workflow can be installed with the following commands.  It is okay if the Checkm2 database install throws an error starting with ``File "checkm2", line 244, in <module>...``.  The PhyloPhlAn run will intentionally fail in order to download the database, but it takes a while silently preparing the database once downloaded.
 
 ::
   
@@ -71,7 +71,7 @@ The output, ``example/output/sample_1/final_profile_by_sample.tsv`` is a MetaPhl
 
 **Phylogenetic output**
 ^^^^^^^^^^^^^^^^^^^^
-The output shows that Pseudoalteromonas marina is present in the sample along with the assembled genome ``sgb_01`` representing a new species genome bin (SGB). We can check the PhyloPhlAn placement of this new SGB by examining ``example/output/sample_1/main/phylophlan/phlophlan_relab.tsv``:
+The output shows that *Pseudoalteromonas marina* is present in the sample along with the assembled genome ``sgb_01`` representing a new species genome bin (SGB). We can check the PhyloPhlAn placement of this new SGB by examining ``example/output/sample_1/main/phylophlan/phlophlan_relab.tsv``:
 
 ::
 
@@ -95,7 +95,7 @@ As seen in the output file tree below, the bins are in ``example/output/sample_1
 
 **Example 2**
 -------------
-We might want to create genome bins after running a standard biobakery workflow. In this case, we can run the SGB workflow on pre-created contigs such as from the ``biobakery_workflows wmgx`` workflow with the ``--run-assembly`` flag. Here, we'll start from the contigs in ``11example/output/sample_2/assembly/main/sample_2/sample_2.contigs.fa``. Note that the original read files are still required since we need to perform alignment for the abundance calculation.
+We might want to create genome bins after running a standard biobakery workflow. In this case, we can run the SGB workflow on pre-created contigs such as from the ``biobakery_workflows wmgx`` workflow with the ``--run-assembly`` flag. Here, we'll start from the contigs in ``example/output/sample_2/assembly/main/sample_2/sample_2.contigs.fa``. Note that the original read files are still required since we need to perform alignment for the abundance calculation.
 
 ::
   
