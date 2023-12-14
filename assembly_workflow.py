@@ -584,8 +584,8 @@ def abundance_sample(name, paired):
 					f = "paired2=$(echo $(zcat " + name + "_paired_2." + input_extension + "|wc -l)/4|bc)",
 					g = "unpaired1=$(echo $(zcat " + name + "_unmatched_1." + input_extension + "|wc -l)/4|bc)",
 					h = "unpaired2=$(echo $(zcat " + name + "_unmatched_2." + input_extension + "|wc -l)/4|bc)",
-					i = "head -n 1 [depends[2]] > [targets[1]]",
-					j = "echo $((paired1+paired2+unpaired1+unpaired2)) &>> [targets[1]]"
+					i = "head -n 1 [depends[2]] > [targets[0]]",
+					j = "echo $((paired1+paired2+unpaired1+unpaired2)) &>> [targets[0]]"
 				)
 			else:
 				command = '''{a} && {b} && {c} && {d}'''.format(
@@ -597,8 +597,8 @@ def abundance_sample(name, paired):
 				command2 = '''{e} && {f} && {g} && {h}'''.format(
 					e = "paired1=$(echo $(zcat " + name + pair_identifier + "." + input_extension + "|wc -l)/4|bc)",
 					f = "paired2=$(echo $(zcat " + name + pair_identifier_2 + "." + input_extension + "|wc -l)/4|bc)",
-					g = "head -n 1 [depends[2]] > [targets[1]]",
-					h = "echo $((paired1+paired2)) &>> [targets[1]]"
+					g = "head -n 1 [depends[2]] > [targets[0]]",
+					h = "echo $((paired1+paired2)) &>> [targets[0]]"
 				)
 		elif input_extension in ["fastq", "fq"]:
 			if pair_identifier == "kneaddata_default":
@@ -613,8 +613,8 @@ def abundance_sample(name, paired):
 					f = "paired2=$(echo $(cat " + name + "_paired_2." + input_extension + "|wc -l)/4|bc)",
 					g = "unpaired1=$(echo $(cat " + name + "_unmatched_1." + input_extension + "|wc -l)/4|bc)",
 					h = "unpaired2=$(echo $(cat " + name + "_unmatched_2." + input_extension + "|wc -l)/4|bc)",
-					i = "head -n 1 [depends[2]] > [targets[1]]",
-					j = "echo $((paired1+paired2+unpaired1+unpaired2)) &>> [targets[1]]"
+					i = "head -n 1 [depends[2]] > [targets[0]]",
+					j = "echo $((paired1+paired2+unpaired1+unpaired2)) &>> [targets[0]]"
 				)
 			else:
 				command = '''{a} && {b} && {c} && {d}'''.format(
@@ -626,8 +626,8 @@ def abundance_sample(name, paired):
 				command2 = '''{e} && {f} && {g} && {h}'''.format(
 					e = "paired1=$(echo $(cat " + name + pair_identifier + "." + input_extension + "|wc -l)/4|bc)",
 					f = "paired2=$(echo $(cat " + name + pair_identifier_2 + "." + input_extension + "|wc -l)/4|bc)",
-					g = "head -n 1 [depends[2]] > [targets[1]]",
-					h = "echo $((paired1+paired2)) &>> [targets[1]]"
+					g = "head -n 1 [depends[2]] > [targets[0]]",
+					h = "echo $((paired1+paired2)) &>> [targets[0]]"
 				)
 	elif paired in ["unpaired", "concatenated"]:
 		if input_extension in ["fastq.gz", "fq.gz"]:
@@ -637,7 +637,7 @@ def abundance_sample(name, paired):
 				c = "python " + assembly_tasks_folder + "checkm.py profile [targets[0]] --tab_table -f [targets[1]]",
 				d = "samtools view -c -F 260 " + bam_sorted + " -o [targets[2]]; fi"
 			)
-			command2 = "head -n 1 [depends[2]] > [targets[1]] && echo $(zcat " + name + "." + input_extension + "|wc -l)/4|bc &>> [targets[1]]"
+			command2 = "head -n 1 [depends[2]] > [targets[0]] && echo $(zcat " + name + "." + input_extension + "|wc -l)/4|bc &>> [targets[0]]"
 		elif input_extension in ["fastq", "fq"]:
 			command = '''{a} && {b} && {c} && {d}; {e} '''.format(
 				a = "if [ ! -s " + contigs + " ]; then echo -e \"Sequence Id\tBin Id\tSequence length (bp)\tBam Id\tCoverage\tMapped reads\" > [targets[0]] && echo -e \"Bin Id\tBin size (Mbp)\t" + name.split("/")[-1] + ".sorted: mapped reads\t" + name.split("/")[-1] + ".sorted: % mapped reads\t" + name.split("/")[-1] + ".sorted: % binned populations\t" + name.split("/")[-1] + ".sorted: % community\" > [targets[1]] && echo 0 > [targets[2]]; else samtools index " + bam_sorted + " -@ " + str(cores) + " " + bam_index,
@@ -645,7 +645,7 @@ def abundance_sample(name, paired):
 				c = "python " + assembly_tasks_folder + "checkm.py profile [targets[0]] --tab_table -f [targets[1]]",
 				d = "samtools view -c -F 260 " + bam_sorted + " -o [targets[2]]; fi"
 			)
-			command2 = "head -n 1 [depends[2]] > [targets[1]] && echo $(cat " + name + "." + input_extension + "|wc -l)/4|bc &>> [targets[1]]"
+			command2 = "head -n 1 [depends[2]] > [targets[0]] && echo $(cat " + name + "." + input_extension + "|wc -l)/4|bc &>> [targets[0]]"
 	return str(command), str(command2)
 
 def rebuild_bowtie2_db():
