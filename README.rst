@@ -1,6 +1,19 @@
 **Assembly workflow**
 ========================
-This repository contains code for Will's assembly workflow based on Aaron Walsh's pets assembly workflow and Segata et al. 2019. For queries, contact Will Nickols (email: <willnickols@college.harvard.edu>).
+This assembly workflow produces quality-controlled metagenomic assembled genomes (MAGs) and profiles the composition of microbial communitites from metagenomic shotgun sequencing. The pipeline is based on Aaron Walsh's pets assembly workflow and `Segata et al. 2019 <https://doi.org/10.1016/j.cell.2019.01.001>`_. For queries, contact Will Nickols (willnickols@college.harvard.edu).
+
+**Overview**
+................
+Often, a metagenomic sample contains new microbes not present in reference taxonomy databases. To characterize these new microbes, it is often helpful to determine their genomes in order to assess their functional abilities and taxonomy relative to known microbes. This workflow provides a method of building such genomes from cleaned metagenomic sequencing files by doing the following:
+
+#. Assemble cleaned reads into contigs with MEGAHIT.
+#. Align the reads to these contigs with Bowtie2 to determine contig coverage.
+#. Bin the contigs into MAGs with MetaBAT 2.
+#. Calculate the per-sample MAG abundance from the contig coverage.
+#. Quality control the MAGs with CheckM2.
+#. Taxonomically assign MAGs if possible with PhyloPhlAn 3.
+#. Recluster unassigned high- and medium-quality MAGs into SGBs with Mash.
+#. Create an abundance table from the taxonomically assigned MAGs and unassigned SGBs.
 
 -------
 
