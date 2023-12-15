@@ -1,6 +1,6 @@
 **Assembly workflow**
 ========================
-This assembly workflow produces quality-controlled metagenomic assembled genomes (MAGs) and profiles the composition of microbial communitites from metagenomic shotgun sequencing. The pipeline is based on Aaron Walsh's pets assembly workflow and `Segata et al. 2019 <https://doi.org/10.1016/j.cell.2019.01.001>`_. For queries, contact Will Nickols (willnickols@college.harvard.edu).
+This assembly workflow produces quality-controlled metagenomic assembled genomes (MAGs) and profiles the composition of microbial communities from metagenomic shotgun sequencing. The pipeline is based on Aaron Walsh's pets assembly workflow and `Segata et al. 2019 <https://doi.org/10.1016/j.cell.2019.01.001>`_. For queries, contact Will Nickols (willnickols@college.harvard.edu).
 
 **Overview**
 ................
@@ -155,7 +155,7 @@ Finally, we can visualize how much of each sample's abundance is made of known m
     cd tutorial/
     Rscript abundance_script.R
 
-We can see that the vast majority of most samples consists of unknown genetic material. Patially, this is due to the fact that wild animal guts are not very well characterized, but it is also due to the fact that assembly methods tend to have low recall. 
+We can see that the vast majority of most samples consists of unknown genetic material. Partially, this is due to the fact that wild animal guts are not very well characterized, but it is also due to the fact that assembly methods tend to have low recall. 
 
 **Output file tree**
 ................
