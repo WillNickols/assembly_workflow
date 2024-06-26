@@ -376,13 +376,14 @@ def deconcatenate(name):
 	return command
 
 if paired == "concatenated":
+	workflow.add_task("touch " + list_paired, targets = list_paired)
 	for name in names:
 		if input_extension in ["fastq.gz", "fq.gz"]:
 			command = "if zgrep -q -m 1 /2$ " + name + "." + input_extension + "; then echo " + name + "." + input_extension + " >> " + list_paired + "; fi && touch " + searched_dir + name.split("/")[-1] + "_searched.log"
-			workflow.add_task(command, depends=[name + "." + input_extension], targets = [searched_dir + name.split("/")[-1] + "_searched.log", list_paired], name="Create paired/unpaired list")
+			workflow.add_task(command, depends=[name + "." + input_extension], targets = [searched_dir + name.split("/")[-1] + "_searched.log"], name="Create paired/unpaired list")
 		else:
 			command = "if grep -q -m 1 /2$ " + name + "." + input_extension + "; then echo " + name + "." + input_extension + " >> " + list_paired + "; fi && touch " + searched_dir + name.split("/")[-1] + "_searched.log"
-			workflow.add_task(command, depends=[name + "." + input_extension], targets = [searched_dir + name.split("/")[-1] + "_searched.log", list_paired], name="Create paired/unpaired list")
+			workflow.add_task(command, depends=[name + "." + input_extension], targets = [searched_dir + name.split("/")[-1] + "_searched.log"], name="Create paired/unpaired list")
 
 	command = "mkdir -p " + scratch + "searched/ && cp " + list_paired + " " + scratch + "searched/paired_list.txt"
 	depends_list = [searched_dir + name.split("/")[-1] + "_searched.log" for name in names]
