@@ -354,8 +354,8 @@ def deconcatenate(name):
 			c = "rm " + unzipped_name,
 			d = "gzip -f " + scratch_deconcatenated + name.split("/")[-1] + "_unmatched_1.fastq",
 			e = "gzip -f " + scratch_deconcatenated + name.split("/")[-1] + "_unmatched_2.fastq",
-			f = "cat " + scratch_deconcatenated + name.split("/")[-1] + "_paired_1.fastq | paste - - - - | sort -k1,1 -S 3G | tr '\t' '\n' | gzip -f > " + scratch_deconcatenated + name.split("/")[-1] + "_1_sorted.fastq.gz",
-			g = "cat " + scratch_deconcatenated + name.split("/")[-1] + "_paired_2.fastq | paste - - - - | sort -k1,1 -S 3G | tr '\t' '\n' | gzip -f > " + scratch_deconcatenated + name.split("/")[-1] + "_2_sorted.fastq.gz",
+			f = "cat " + scratch_deconcatenated + name.split("/")[-1] + "_paired_1.fastq | paste - - - - | sort -k1,1 -S 3G -T " + scratch_deconcatenated + " | tr '\t' '\n' | gzip -f > " + scratch_deconcatenated + name.split("/")[-1] + "_1_sorted.fastq.gz",
+			g = "cat " + scratch_deconcatenated + name.split("/")[-1] + "_paired_2.fastq | paste - - - - | sort -k1,1 -S 3G -T " + scratch_deconcatenated + " | tr '\t' '\n' | gzip -f > " + scratch_deconcatenated + name.split("/")[-1] + "_2_sorted.fastq.gz",
 			h = "rm " + scratch_deconcatenated + name.split("/")[-1] + "_paired_1.fastq",
 			i = "rm " + scratch_deconcatenated + name.split("/")[-1] + "_paired_2.fastq",
 			j = "mv " + scratch_deconcatenated + name.split("/")[-1] + "_1_sorted.fastq.gz " + scratch_deconcatenated + name.split("/")[-1] + "_paired_1.fastq.gz",
@@ -366,8 +366,8 @@ def deconcatenate(name):
 			a = "if grep -q -m 1 " + name + " " + list_paired + "; then  python " + assembly_tasks_folder + "deconcatenate.py " + name + "." + input_extension + " " + scratch_deconcatenated + name.split("/")[-1],
 			b = "gzip -f " + scratch_deconcatenated + name.split("/")[-1] + "_unmatched_1.fastq",
 			c = "gzip -f " + scratch_deconcatenated + name.split("/")[-1] + "_unmatched_2.fastq",
-			d = "cat " + scratch_deconcatenated + name.split("/")[-1] + "_paired_1.fastq | paste - - - - | sort -k1,1 -S 3G | tr '\t' '\n' | gzip -f > " + scratch_deconcatenated + name.split("/")[-1] + "_1_sorted.fastq.gz",
-			e = "cat " + scratch_deconcatenated + name.split("/")[-1] + "_paired_2.fastq | paste - - - - | sort -k1,1 -S 3G | tr '\t' '\n' | gzip -f > " + scratch_deconcatenated + name.split("/")[-1] + "_2_sorted.fastq.gz",
+			d = "cat " + scratch_deconcatenated + name.split("/")[-1] + "_paired_1.fastq | paste - - - - | sort -k1,1 -S 3G -T " + scratch_deconcatenated + " | tr '\t' '\n' | gzip -f > " + scratch_deconcatenated + name.split("/")[-1] + "_1_sorted.fastq.gz",
+			e = "cat " + scratch_deconcatenated + name.split("/")[-1] + "_paired_2.fastq | paste - - - - | sort -k1,1 -S 3G -T " + scratch_deconcatenated + " | tr '\t' '\n' | gzip -f > " + scratch_deconcatenated + name.split("/")[-1] + "_2_sorted.fastq.gz",
 			f = "rm " + scratch_deconcatenated + name.split("/")[-1] + "_paired_1.fastq",
 			g = "rm " + scratch_deconcatenated + name.split("/")[-1] + "_paired_2.fastq",
 			h = "mv " + scratch_deconcatenated + name.split("/")[-1] + "_1_sorted.fastq.gz " + scratch_deconcatenated + name.split("/")[-1] + "_paired_1.fastq.gz",
@@ -535,13 +535,15 @@ for name in names:
 def metabat(name):
 	contigs = contigs_dir + name.split("/")[-1] + "/" + name.split("/")[-1] + ".final.contigs.fa"
 	depth = depths_dir + name.split("/")[-1] + ".contig_depths.txt"
-	metabat_tmp = mags_scratch + name.split("/")[-1] + "/bins/" + name.split("/")[-1]
+	metabat_tmp_dir = mags_scratch + name.split("/")[-1] + "/bins/"
+	metabat_tmp = metabat_tmp_dir + name.split("/")[-1]
 	metabat_out = bins_dir + name.split("/")[-1] + "/bins/"
-	command = '''{a} && {b} && {c} && {d}'''.format(
-		a = "if [ ! -s " + contigs + " ]; then mkdir -p " + metabat_tmp + " && touch " + metabat_tmp + ".bin.lowDepth.fa && touch " + metabat_tmp + ".bin.tooShort.fa && touch " + metabat_tmp + ".bin.unbinned.fa; else metabat2 -i " + contigs + " -a " + depth + " -o " + metabat_tmp + ".bin --unbinned -m " + str(args.min_contig_length) + " -t " + str(cores) + " " + args.metabat_options + "; fi",
-		b = "mkdir -p " + metabat_out,
-		c = "cp " + metabat_tmp + "*.fa " + metabat_out,
-		d = "touch [targets[0]]"
+	command = '''{a} && {b} && {c} && {d} && {e}'''.format(
+		a = "if [ ! -s " + contigs + " ]; then mkdir -p " + metabat_tmp_dir + " && touch " + metabat_tmp + ".bin.lowDepth.fa && touch " + metabat_tmp + ".bin.tooShort.fa && touch " + metabat_tmp + ".bin.unbinned.fa; else metabat2 -i " + contigs + " -a " + depth + " -o " + metabat_tmp + ".bin --unbinned -m " + str(args.min_contig_length) + " -t " + str(cores) + " " + args.metabat_options + "; fi",
+		b = "if ! [ \"$(ls -A " + metabat_tmp_dir + ")\" ]; then mkdir -p " + metabat_tmp_dir + " && touch " + metabat_tmp + ".bin.lowDepth.fa && touch " + metabat_tmp + ".bin.tooShort.fa && touch " + metabat_tmp + ".bin.unbinned.fa; fi",
+		c = "mkdir -p " + metabat_out,
+		d = "cp " + metabat_tmp + "*.fa " + metabat_out,
+		e = "touch [targets[0]]"
 		)
 	return str(command)
 
@@ -568,14 +570,14 @@ def abundance_sample(name, paired):
 	bam_unsorted = bowtie2_dir + name.split("/")[-1] + ".unsorted.bam"
 	bam_sorted = bowtie2_dir + name.split("/")[-1] + ".sorted.bam"
 	bam_index = bowtie2_dir + name.split("/")[-1] + ".sorted.bam.bai"
-	bin = bins_dir + name.split("/")[-1] + "/bins"
+	specific_bin_dir = bins_dir + name.split("/")[-1] + "/bins"
 
 	if paired == "paired":
 		if input_extension in ["fastq.gz", "fq.gz"]:
 			if pair_identifier == "kneaddata_default":
 				command = '''{a} && {b} && {c} && {d} && {e} && {f} && {g} && {h} && {i}'''.format(
-					a = "if [ ! -s " + contigs + " ]; then echo -e \"Sequence Id\tBin Id\tSequence length (bp)\tBam Id\tCoverage\tMapped reads\" > [targets[0]] && echo -e \"Bin Id\tBin size (Mbp)\t" + name.split("/")[-1] + ".sorted: mapped reads\t" + name.split("/")[-1] + ".sorted: % mapped reads\t" + name.split("/")[-1] + ".sorted: % binned populations\t" + name.split("/")[-1] + ".sorted: % community\" > [targets[1]] && echo 0 > [targets[2]] && echo 0 > [targets[3]]; else samtools index " + bam_sorted + " -@ " + str(cores) + " " + bam_index,
-					b = "python " + assembly_tasks_folder + "checkm.py coverage " + bin + " [targets[0]] " + bam_sorted + " -x fa -t " + str(cores) + " -r " + args.checkm_coverage_options,
+					a = "if [ -z \"$(find " + specific_bin_dir + " -type f -size +0c -print -quit)\" ] || [ ! -s " + contigs + " ]; then echo -e \"Sequence Id\tBin Id\tSequence length (bp)\tBam Id\tCoverage\tMapped reads\" > [targets[0]] && echo -e \"Bin Id\tBin size (Mbp)\t" + name.split("/")[-1] + ".sorted: mapped reads\t" + name.split("/")[-1] + ".sorted: % mapped reads\t" + name.split("/")[-1] + ".sorted: % binned populations\t" + name.split("/")[-1] + ".sorted: % community\" > [targets[1]] && echo 0 > [targets[2]] && echo 0 > [targets[3]]; else samtools index " + bam_sorted + " -@ " + str(cores) + " " + bam_index,
+					b = "python " + assembly_tasks_folder + "checkm.py coverage " + specific_bin_dir + " [targets[0]] " + bam_sorted + " -x fa -t " + str(cores) + " -r " + args.checkm_coverage_options,
 					c = "python " + assembly_tasks_folder + "checkm.py profile [targets[0]] --tab_table -f [targets[1]]",
 					d = "samtools view -c -F 260 " + bam_sorted + " -o [targets[2]]; fi",
 					e = "paired1=$(echo $(zcat " + name + "_paired_1." + input_extension + "|wc -l)/4|bc)",
@@ -586,8 +588,8 @@ def abundance_sample(name, paired):
 					)
 			else:
 				command = '''{a} && {b} && {c} && {d} && {e} && {f} && {i}'''.format(
-					a = "if [ ! -s " + contigs + " ]; then echo -e \"Sequence Id\tBin Id\tSequence length (bp)\tBam Id\tCoverage\tMapped reads\" > [targets[0]] && echo -e \"Bin Id\tBin size (Mbp)\t" + name.split("/")[-1] + ".sorted: mapped reads\t" + name.split("/")[-1] + ".sorted: % mapped reads\t" + name.split("/")[-1] + ".sorted: % binned populations\t" + name.split("/")[-1] + ".sorted: % community\" > [targets[1]] && echo 0 > [targets[2]] && echo 0 > [targets[3]]; else samtools index " + bam_sorted + " -@ " + str(cores) + " " + bam_index,
-					b = "python " + assembly_tasks_folder + "checkm.py coverage " + bin + " [targets[0]] " + bam_sorted + " -x fa -t " + str(cores) + " -r " + args.checkm_coverage_options,
+					a = "if [ -z \"$(find " + specific_bin_dir + " -type f -size +0c -print -quit)\" ] || [ ! -s " + contigs + " ]; then echo -e \"Sequence Id\tBin Id\tSequence length (bp)\tBam Id\tCoverage\tMapped reads\" > [targets[0]] && echo -e \"Bin Id\tBin size (Mbp)\t" + name.split("/")[-1] + ".sorted: mapped reads\t" + name.split("/")[-1] + ".sorted: % mapped reads\t" + name.split("/")[-1] + ".sorted: % binned populations\t" + name.split("/")[-1] + ".sorted: % community\" > [targets[1]] && echo 0 > [targets[2]] && echo 0 > [targets[3]]; else samtools index " + bam_sorted + " -@ " + str(cores) + " " + bam_index,
+					b = "python " + assembly_tasks_folder + "checkm.py coverage " + specific_bin_dir + " [targets[0]] " + bam_sorted + " -x fa -t " + str(cores) + " -r " + args.checkm_coverage_options,
 					c = "python " + assembly_tasks_folder + "checkm.py profile [targets[0]] --tab_table -f [targets[1]]",
 					d = "samtools view -c -F 260 " + bam_sorted + " -o [targets[2]]; fi",
 					e = "paired1=$(echo $(zcat " + name + pair_identifier + "." + input_extension + "|wc -l)/4|bc)",
@@ -597,8 +599,8 @@ def abundance_sample(name, paired):
 		elif input_extension in ["fastq", "fq"]:
 			if pair_identifier == "kneaddata_default":
 				command = '''{a} && {b} && {c} && {d} && {e} && {f} && {g} && {h} && {i}'''.format(
-					a = "if [ ! -s " + contigs + " ]; then echo -e \"Sequence Id\tBin Id\tSequence length (bp)\tBam Id\tCoverage\tMapped reads\" > [targets[0]] && echo -e \"Bin Id\tBin size (Mbp)\t" + name.split("/")[-1] + ".sorted: mapped reads\t" + name.split("/")[-1] + ".sorted: % mapped reads\t" + name.split("/")[-1] + ".sorted: % binned populations\t" + name.split("/")[-1] + ".sorted: % community\" > [targets[1]] && echo 0 > [targets[2]] && echo 0 > [targets[3]]; else samtools index " + bam_sorted + " -@ " + str(cores) + " " + bam_index,
-					b = "python " + assembly_tasks_folder + "checkm.py coverage " + bin + " [targets[0]] " + bam_sorted + " -x fa -t " + str(cores) + " -r " + args.checkm_coverage_options,
+					a = "if [ -z \"$(find " + specific_bin_dir + " -type f -size +0c -print -quit)\" ] || [ ! -s " + contigs + " ]; then echo -e \"Sequence Id\tBin Id\tSequence length (bp)\tBam Id\tCoverage\tMapped reads\" > [targets[0]] && echo -e \"Bin Id\tBin size (Mbp)\t" + name.split("/")[-1] + ".sorted: mapped reads\t" + name.split("/")[-1] + ".sorted: % mapped reads\t" + name.split("/")[-1] + ".sorted: % binned populations\t" + name.split("/")[-1] + ".sorted: % community\" > [targets[1]] && echo 0 > [targets[2]] && echo 0 > [targets[3]]; else samtools index " + bam_sorted + " -@ " + str(cores) + " " + bam_index,
+					b = "python " + assembly_tasks_folder + "checkm.py coverage " + specific_bin_dir + " [targets[0]] " + bam_sorted + " -x fa -t " + str(cores) + " -r " + args.checkm_coverage_options,
 					c = "python " + assembly_tasks_folder + "checkm.py profile [targets[0]] --tab_table -f [targets[1]]",
 					d = "samtools view -c -F 260 " + bam_sorted + " -o [targets[2]]; fi",
 					e = "paired1=$(echo $(cat " + name + "_paired_1." + input_extension + "|wc -l)/4|bc)",
@@ -609,8 +611,8 @@ def abundance_sample(name, paired):
 					)
 			else:
 				command = '''{a} && {b} && {c} && {d} && {e} && {f} && {i}'''.format(
-					a = "if [ ! -s " + contigs + " ]; then echo -e \"Sequence Id\tBin Id\tSequence length (bp)\tBam Id\tCoverage\tMapped reads\" > [targets[0]] && echo -e \"Bin Id\tBin size (Mbp)\t" + name.split("/")[-1] + ".sorted: mapped reads\t" + name.split("/")[-1] + ".sorted: % mapped reads\t" + name.split("/")[-1] + ".sorted: % binned populations\t" + name.split("/")[-1] + ".sorted: % community\" > [targets[1]] && echo 0 > [targets[2]] && echo 0 > [targets[3]]; else samtools index " + bam_sorted + " -@ " + str(cores) + " " + bam_index,
-					b = "python " + assembly_tasks_folder + "checkm.py coverage " + bin + " [targets[0]] " + bam_sorted + " -x fa -t " + str(cores) + " -r " + args.checkm_coverage_options,
+					a = "if [ -z \"$(find " + specific_bin_dir + " -type f -size +0c -print -quit)\" ] || [ ! -s " + contigs + " ]; then echo -e \"Sequence Id\tBin Id\tSequence length (bp)\tBam Id\tCoverage\tMapped reads\" > [targets[0]] && echo -e \"Bin Id\tBin size (Mbp)\t" + name.split("/")[-1] + ".sorted: mapped reads\t" + name.split("/")[-1] + ".sorted: % mapped reads\t" + name.split("/")[-1] + ".sorted: % binned populations\t" + name.split("/")[-1] + ".sorted: % community\" > [targets[1]] && echo 0 > [targets[2]] && echo 0 > [targets[3]]; else samtools index " + bam_sorted + " -@ " + str(cores) + " " + bam_index,
+					b = "python " + assembly_tasks_folder + "checkm.py coverage " + specific_bin_dir + " [targets[0]] " + bam_sorted + " -x fa -t " + str(cores) + " -r " + args.checkm_coverage_options,
 					c = "python " + assembly_tasks_folder + "checkm.py profile [targets[0]] --tab_table -f [targets[1]]",
 					d = "samtools view -c -F 260 " + bam_sorted + " -o [targets[2]]; fi",
 					e = "paired1=$(echo $(cat " + name + pair_identifier + "." + input_extension + "|wc -l)/4|bc)",
@@ -620,16 +622,16 @@ def abundance_sample(name, paired):
 	elif paired in ["unpaired", "concatenated"]:
 		if input_extension in ["fastq.gz", "fq.gz"]:
 			command = '''{a} && {b} && {c} && {d} && {e} '''.format(
-				a = "if [ ! -s " + contigs + " ]; then echo -e \"Sequence Id\tBin Id\tSequence length (bp)\tBam Id\tCoverage\tMapped reads\" > [targets[0]] && echo -e \"Bin Id\tBin size (Mbp)\t" + name.split("/")[-1] + ".sorted: mapped reads\t" + name.split("/")[-1] + ".sorted: % mapped reads\t" + name.split("/")[-1] + ".sorted: % binned populations\t" + name.split("/")[-1] + ".sorted: % community\" > [targets[1]] && echo 0 > [targets[2]] && echo 0 > [targets[3]]; else samtools index " + bam_sorted + " -@ " + str(cores) + " " + bam_index,
-				b = "python " + assembly_tasks_folder + "checkm.py coverage " + bin + " [targets[0]] " + bam_sorted + " -x fa -t " + str(cores) + " -r " + args.checkm_coverage_options,
+				a = "if [ -z \"$(find " + specific_bin_dir + " -type f -size +0c -print -quit)\" ] || [ ! -s " + contigs + " ]; then echo -e \"Sequence Id\tBin Id\tSequence length (bp)\tBam Id\tCoverage\tMapped reads\" > [targets[0]] && echo -e \"Bin Id\tBin size (Mbp)\t" + name.split("/")[-1] + ".sorted: mapped reads\t" + name.split("/")[-1] + ".sorted: % mapped reads\t" + name.split("/")[-1] + ".sorted: % binned populations\t" + name.split("/")[-1] + ".sorted: % community\" > [targets[1]] && echo 0 > [targets[2]] && echo 0 > [targets[3]]; else samtools index " + bam_sorted + " -@ " + str(cores) + " " + bam_index,
+				b = "python " + assembly_tasks_folder + "checkm.py coverage " + specific_bin_dir + " [targets[0]] " + bam_sorted + " -x fa -t " + str(cores) + " -r " + args.checkm_coverage_options,
 				c = "python " + assembly_tasks_folder + "checkm.py profile [targets[0]] --tab_table -f [targets[1]]",
 				d = "samtools view -c -F 260 " + bam_sorted + " -o [targets[2]]; fi",
 				e = "echo $(zcat " + name + "." + input_extension + "|wc -l)/4|bc > [targets[3]]"
 				)
 		elif input_extension in ["fastq", "fq"]:
 			command = '''{a} && {b} && {c} && {d} && {e} '''.format(
-				a = "if [ ! -s " + contigs + " ]; then echo -e \"Sequence Id\tBin Id\tSequence length (bp)\tBam Id\tCoverage\tMapped reads\" > [targets[0]] && echo -e \"Bin Id\tBin size (Mbp)\t" + name.split("/")[-1] + ".sorted: mapped reads\t" + name.split("/")[-1] + ".sorted: % mapped reads\t" + name.split("/")[-1] + ".sorted: % binned populations\t" + name.split("/")[-1] + ".sorted: % community\" > [targets[1]] && echo 0 > [targets[2]] && echo 0 > [targets[3]]; else samtools index " + bam_sorted + " -@ " + str(cores) + " " + bam_index,
-				b = "python " + assembly_tasks_folder + "checkm.py coverage " + bin + " [targets[0]] " + bam_sorted + " -x fa -t " + str(cores) + " -r " + args.checkm_coverage_options,
+				a = "if [ -z \"$(find " + specific_bin_dir + " -type f -size +0c -print -quit)\" ] || [ ! -s " + contigs + " ]; then echo -e \"Sequence Id\tBin Id\tSequence length (bp)\tBam Id\tCoverage\tMapped reads\" > [targets[0]] && echo -e \"Bin Id\tBin size (Mbp)\t" + name.split("/")[-1] + ".sorted: mapped reads\t" + name.split("/")[-1] + ".sorted: % mapped reads\t" + name.split("/")[-1] + ".sorted: % binned populations\t" + name.split("/")[-1] + ".sorted: % community\" > [targets[1]] && echo 0 > [targets[2]] && echo 0 > [targets[3]]; else samtools index " + bam_sorted + " -@ " + str(cores) + " " + bam_index,
+				b = "python " + assembly_tasks_folder + "checkm.py coverage " + specific_bin_dir + " [targets[0]] " + bam_sorted + " -x fa -t " + str(cores) + " -r " + args.checkm_coverage_options,
 				c = "python " + assembly_tasks_folder + "checkm.py profile [targets[0]] --tab_table -f [targets[1]]",
 				d = "samtools view -c -F 260 " + bam_sorted + " -o [targets[2]]; fi",
 				e = "echo $(cat " + name + "." + input_extension + "|wc -l)/4|bc > [targets[3]]"
@@ -849,7 +851,7 @@ for name in names:
 	os.makedirs(checkm_qa_scratch + name.split("/")[-1] + "/", exist_ok=True)
 	os.makedirs(qa_unmerged_dir + name.split("/")[-1] + "/", exist_ok=True)
 	if args.grid_jobs > 0:
-		command = "if ls " + metabat_out + "*.bin.[0-9]*.fa; then checkm2 predict -x fa --input " + checkm_bin_name + " --output-directory " + checkm_qa_scratch + name.split("/")[-1] + "/" + " --threads " + str(args.cores) + " " + args.checkm_predict_options + "; " + \
+		command = "if ls " + metabat_out + "*.bin.[0-9]*.fa; then checkm2 predict -x fa --input " + checkm_bin_name + " --output-directory " + checkm_qa_scratch + name.split("/")[-1] + "/" + " --threads " + str(args.cores) + " " + args.checkm_predict_options + " && mv " + checkm_qa_scratch + name.split("/")[-1] + "/quality_report.tsv " + qa_unmerged_dir + name.split("/")[-1] + "/quality_report.tsv" + "; " + \
 			"else echo -e \"Name\tCompleteness\tContamination\tCompleteness_Model_Used\tTranslation_Table_Used\tCoding_Density\tContig_N50\tAverage_Gene_Length\tGenome_Size\tGC_Content\tTotal_Coding_Sequences\tAdditional_Notes\" > " + qa_unmerged_dir + name.split("/")[-1] + "/quality_report.tsv; fi"
 	else:
 		command = "if ls " + metabat_out + "*.bin.[0-9]*.fa; then checkm2 predict -x fa --input " + checkm_bin_name + " --output-directory " + qa_unmerged_dir + name.split("/")[-1] + "/" + " --threads " + str(args.cores) + " " + args.checkm_predict_options + "; " + \

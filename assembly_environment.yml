@@ -64,7 +64,7 @@ dependencies:
   - decorator=5.1.1=pyhd8ed1ab_0
   - defusedxml=0.7.1=pyhd8ed1ab_0
   - dendropy=4.5.2=pyh3252c3a_0
-  - diamond=2.0.4=h56fc30b_0
+  - diamond=2.0.4
   - dill=0.3.6=pyhd8ed1ab_1
   - entrez-direct=16.2=he881be0_1
   - entrypoints=0.4=pyhd8ed1ab_0
